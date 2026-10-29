@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "endpointKey": "usb-0b05-189d-mi00:speakers:1",
+  "endpointRole": "speakers",
+  "revision": 5,
+  "driver": {
+    "kind": "xonarse",
+    "version": "0.3.3.0",
+    "packageSha256": null
+  },
+  "negotiatedFormat": {
+    "sampleRate": 48000,
+    "channelMask": 1551,
+    "channelCount": 6,
+    "sampleFormat": "float32"
+  },
+  "profileId": "c96e4179-24d1-4954-b3b5-968dc5d64e2e",
+  "listeningMode": "2.0",
+  "requestedPolicy": "autoDeclaredLayout",
+  "resolvedPolicy": "neutral",
+  "desiredGeneration": 12,
+  "committedGeneration": 12,
+  "partiallyApplied": false,
+  "instances": [
+    {
+      "instanceId": "sfx-0",
+      "stage": "SFX",
+      "epoch": 7,
+      "appliedGeneration": 12,
+      "inputFormat": {
+        "sampleRate": 48000,
+        "channelMask": 3,
+        "channelCount": 2,
+        "sampleFormat": "float32"
+      },
+      "bypass": {
+        "kind": "none",
+        "reason": null
+      }
+    },
+    {
+      "instanceId": "sfx-1",
+      "stage": "SFX",
+      "epoch": 7,
+      "appliedGeneration": 12,
+      "inputFormat": {
+        "sampleRate": 48000,
+        "channelMask": 63,
+        "channelCount": 6,
+        "sampleFormat": "float32"
+      },
+      "bypass": {
+        "kind": "none",
+        "reason": null
+      }
+    },
+    {
+      "instanceId": "efx-0",
+      "stage": "EFX",
+      "epoch": 7,
+      "appliedGeneration": 12,
+      "inputFormat": {
+        "sampleRate": 48000,
+        "channelMask": 1551,
+        "channelCount": 6,
+        "sampleFormat": "float32"
+      },
+      "bypass": {
+        "kind": "observed",
+        "reason": "exclusiveMode"
+      }
+    }
+  ],
+  "jack": {
+    "reliability": "forcedConnection",
+    "publishedConnected": true
+  },
+  "meters": {
+    "ageMs": 40,
+    "stale": false,
+    "outputPeakDbfs": [
+      -12.5,
+      -12.7,
+      -18,
+      -24,
+      -20.1,
+      -20.3
+    ],
+    "limiterReductionDb": 0,
+    "nonFiniteFrames": 0,
+    "telemetryLost": 0
+  }
+}

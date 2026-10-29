@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "endpointKey": "usb-0b05-189d-mi00:speakers:1",
+  "endpointRole": "speakers",
+  "revision": 5,
+  "driver": {
+    "kind": "xonarse",
+    "version": "0.3.3.0",
+    "packageSha256": null
+  },
+  "negotiatedFormat": {
+    "sampleRate": 48000,
+    "channelMask": 1551,
+    "channelCount": 6,
+    "sampleFormat": "float32"
+  },
+  "profileId": "40cb4ea8-4774-4cd1-9d29-5d305412d49e",
+  "listeningMode": "upmix",
+  "requestedPolicy": "autoDeclaredLayout",
+  "resolvedPolicy": "autoDeclaredLayout",
+  "desiredGeneration": 13,
+  "committedGeneration": 13,
+  "partiallyApplied": true,
+  "instances": [
+    {
+      "instanceId": "sfx-0",
+      "stage": "SFX",
+      "epoch": 7,
+      "appliedGeneration": 13,
+      "inputFormat": {
+        "sampleRate": 48000,
+        "channelMask": 3,
+        "channelCount": 2,
+        "sampleFormat": "float32"
+      },
+      "bypass": {
+        "kind": "none",
+        "reason": null
+      }
+    },
+    {
+      "instanceId": "efx-0",
+      "stage": "EFX",
+      "epoch": 7,
+      "appliedGeneration": 12,
+      "inputFormat": {
+        "sampleRate": 48000,
+        "channelMask": 1551,
+        "channelCount": 6,
+        "sampleFormat": "float32"
+      },
+      "bypass": {
+        "kind": "unknown",
+        "reason": null
+      }
+    }
+  ],
+  "jack": {
+    "reliability": "forcedConnection",
+    "publishedConnected": true
+  },
+  "meters": {
+    "ageMs": 2500,
+    "stale": true,
+    "outputPeakDbfs": [
+      -12.5,
+      -12.7,
+      -18,
+      -24,
+      -20.1,
+      -20.3
+    ],
+    "limiterReductionDb": 0,
+    "nonFiniteFrames": 0,
+    "telemetryLost": 0
+  }
+}

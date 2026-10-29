@@ -1,0 +1,279 @@
+;
+; xonarse.inx : source de l'INF du pilote Xonar SE Open Driver (traite par stampinf).
+;
+; PILOTE EXPERIMENTAL, SIGNATURE DE TEST : a installer uniquement dans la machine
+; virtuelle de test (docs/driver-vm-setup.md). Cible exclusivement l'interface audio
+; USB de l'ASUS Xonar SE ; ne touche aucun autre peripherique audio.
+;
+; Structure inspiree de l'INF de l'echantillon Microsoft SYSVAD (licence MIT) et de la
+; topologie observee dans l'INF C-Media (docs/analyse-paquet-pilote-asus.md, section 4).
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=MEDIA
+ClassGuid={4d36e96c-e325-11ce-bfc1-08002be10318}
+Provider=%ProviderName%
+CatalogFile=xonarse.cat
+DriverVer=
+PnpLockdown=1
+
+[DestinationDirs]
+DefaultDestDir = 13 ; magasin de pilotes (DIRID_DRIVER_STORE)
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+xonarse.sys = 1,,
+
+[Manufacturer]
+%ManufacturerName%=Standard,NTamd64.10.0...19041
+
+[Standard.NTamd64.10.0...19041]
+%XonarSe.DeviceDesc%=XonarSe_Install, USB\VID_0B05&PID_189D&MI_00
+
+;---------------------------------------------------------------
+;                I n s t a l l a t i o n
+;---------------------------------------------------------------
+
+[XonarSe_Install.NT]
+Include=ks.inf, wdmaudio.inf
+Needs=KS.Registration, WDMAUDIO.Registration
+CopyFiles=XonarSe_CopyFiles
+AddReg=XonarSe_AddReg
+
+[XonarSe_CopyFiles]
+xonarse.sys
+
+[XonarSe_AddReg]
+HKR,,AssociatedFilters,,"wdmaud,redbook"
+HKR,,Driver,,xonarse.sys
+HKR,Drivers,SubClasses,,"wave,mixer"
+HKR,Drivers\wave\wdmaud.drv,Driver,,wdmaud.drv
+HKR,Drivers\mixer\wdmaud.drv,Driver,,wdmaud.drv
+HKR,Drivers\wave\wdmaud.drv,Description,,%XonarSe.DeviceDesc%
+HKR,Drivers\mixer\wdmaud.drv,Description,,%XonarSe.DeviceDesc%
+; Reglages lus par adapter.cpp (sous-cle Settings de la cle du pilote).
+; HonorJackDetection=0 : endpoints toujours signales connectes (voir common.h).
+HKR,Settings,HonorJackDetection,%REG_DWORD%,0
+HKR,Settings,DefaultSampleRate,%REG_DWORD%,48000
+
+[XonarSe_Install.NT.Services]
+AddService=xonarse, 0x00000002, XonarSe_Service
+
+[XonarSe_Service]
+DisplayName=%XonarSe.ServiceDesc%
+ServiceType=1   ; SERVICE_KERNEL_DRIVER
+StartType=3     ; SERVICE_DEMAND_START
+ErrorControl=1  ; SERVICE_ERROR_NORMAL
+ServiceBinary=%13%\xonarse.sys
+
+;---------------------------------------------------------------
+;                I n t e r f a c e s   K S
+;---------------------------------------------------------------
+; Les noms de reference (WaveSpeaker, TopologySpeaker, ...) DOIVENT correspondre a
+; XonarSeWaveName / XonarSeTopologyName de common.h.
+
+[XonarSe_Install.NT.Interfaces]
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_WaveSpeaker%,XonarSe.I.WaveSpeaker
+AddInterface=%KSCATEGORY_RENDER%,%KSNAME_WaveSpeaker%,XonarSe.I.WaveSpeaker
+AddInterface=%KSCATEGORY_REALTIME%,%KSNAME_WaveSpeaker%,XonarSe.I.WaveSpeaker
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_TopologySpeaker%,XonarSe.I.TopologySpeaker
+AddInterface=%KSCATEGORY_TOPOLOGY%,%KSNAME_TopologySpeaker%,XonarSe.I.TopologySpeaker
+
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_WaveHeadphone%,XonarSe.I.WaveHeadphone
+AddInterface=%KSCATEGORY_RENDER%,%KSNAME_WaveHeadphone%,XonarSe.I.WaveHeadphone
+AddInterface=%KSCATEGORY_REALTIME%,%KSNAME_WaveHeadphone%,XonarSe.I.WaveHeadphone
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_TopologyHeadphone%,XonarSe.I.TopologyHeadphone
+AddInterface=%KSCATEGORY_TOPOLOGY%,%KSNAME_TopologyHeadphone%,XonarSe.I.TopologyHeadphone
+
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_WaveSpdif%,XonarSe.I.WaveSpdif
+AddInterface=%KSCATEGORY_RENDER%,%KSNAME_WaveSpdif%,XonarSe.I.WaveSpdif
+AddInterface=%KSCATEGORY_REALTIME%,%KSNAME_WaveSpdif%,XonarSe.I.WaveSpdif
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_TopologySpdif%,XonarSe.I.TopologySpdif
+AddInterface=%KSCATEGORY_TOPOLOGY%,%KSNAME_TopologySpdif%,XonarSe.I.TopologySpdif
+
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_WaveCapture%,XonarSe.I.WaveCapture
+AddInterface=%KSCATEGORY_CAPTURE%,%KSNAME_WaveCapture%,XonarSe.I.WaveCapture
+AddInterface=%KSCATEGORY_REALTIME%,%KSNAME_WaveCapture%,XonarSe.I.WaveCapture
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_TopologyCapture%,XonarSe.I.TopologyCapture
+AddInterface=%KSCATEGORY_TOPOLOGY%,%KSNAME_TopologyCapture%,XonarSe.I.TopologyCapture
+
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_WaveLine%,XonarSe.I.WaveLine
+AddInterface=%KSCATEGORY_CAPTURE%,%KSNAME_WaveLine%,XonarSe.I.WaveLine
+AddInterface=%KSCATEGORY_REALTIME%,%KSNAME_WaveLine%,XonarSe.I.WaveLine
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_TopologyLine%,XonarSe.I.TopologyLine
+AddInterface=%KSCATEGORY_TOPOLOGY%,%KSNAME_TopologyLine%,XonarSe.I.TopologyLine
+
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_WaveMic2%,XonarSe.I.WaveMic2
+AddInterface=%KSCATEGORY_CAPTURE%,%KSNAME_WaveMic2%,XonarSe.I.WaveMic2
+AddInterface=%KSCATEGORY_REALTIME%,%KSNAME_WaveMic2%,XonarSe.I.WaveMic2
+AddInterface=%KSCATEGORY_AUDIO%,%KSNAME_TopologyMic2%,XonarSe.I.TopologyMic2
+AddInterface=%KSCATEGORY_TOPOLOGY%,%KSNAME_TopologyMic2%,XonarSe.I.TopologyMic2
+
+; --- Haut-parleurs 5.1 ---
+[XonarSe.I.WaveSpeaker]
+AddReg=XonarSe.I.WaveSpeaker.AddReg
+[XonarSe.I.WaveSpeaker.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.WaveSpeaker.szPname%
+
+[XonarSe.I.TopologySpeaker]
+AddReg=XonarSe.I.TopologySpeaker.AddReg, XonarSe.EP.Speaker.AddReg
+[XonarSe.I.TopologySpeaker.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.TopologySpeaker.szPname%
+
+; Format par defaut du moteur audio : 6 canaux, 24/24 bits, 48 kHz, masque 0x60F
+; (FL FR FC LFE SL SR). Corrige le retour silencieux en stereo constate avec usbaudio2.
+; Blob = en-tete PROPVARIANT VT_BLOB (8 octets, forme documentee par Microsoft) + WAVEFORMATEXTENSIBLE.
+[XonarSe.EP.Speaker.AddReg]
+HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
+HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,%REG_DWORD%,0x1
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,63,00,c0,00,00,00,fe,ff,06,00,80,bb,00,00,00,2f,0d,00,12,00,18,00,16,00,18,00,0f,06,00,00,01,00,00,00,00,00,10,00,80,00,00,aa,00,38,9b,71
+
+; --- Casque ---
+[XonarSe.I.WaveHeadphone]
+AddReg=XonarSe.I.WaveHeadphone.AddReg
+[XonarSe.I.WaveHeadphone.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.WaveHeadphone.szPname%
+
+[XonarSe.I.TopologyHeadphone]
+AddReg=XonarSe.I.TopologyHeadphone.AddReg, XonarSe.EP.Headphone.AddReg
+[XonarSe.I.TopologyHeadphone.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.TopologyHeadphone.szPname%
+
+; Format par defaut : 2 canaux, 24/24 bits, 48 kHz.
+[XonarSe.EP.Headphone.AddReg]
+HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
+HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,%REG_DWORD%,0x1
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,63,00,c0,00,00,00,fe,ff,02,00,80,bb,00,00,00,65,04,00,06,00,18,00,16,00,18,00,03,00,00,00,01,00,00,00,00,00,10,00,80,00,00,aa,00,38,9b,71
+
+; --- S/PDIF ---
+[XonarSe.I.WaveSpdif]
+AddReg=XonarSe.I.WaveSpdif.AddReg
+[XonarSe.I.WaveSpdif.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.WaveSpdif.szPname%
+
+[XonarSe.I.TopologySpdif]
+AddReg=XonarSe.I.TopologySpdif.AddReg, XonarSe.EP.Spdif.AddReg
+[XonarSe.I.TopologySpdif.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.TopologySpdif.szPname%
+
+; Format par defaut : 2 canaux, 16/16 bits, 48 kHz.
+[XonarSe.EP.Spdif.AddReg]
+HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
+HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,%REG_DWORD%,0x1
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,63,00,c0,00,00,00,fe,ff,02,00,80,bb,00,00,00,ee,02,00,04,00,10,00,16,00,10,00,03,00,00,00,01,00,00,00,00,00,10,00,80,00,00,aa,00,38,9b,71
+
+; --- Capture micro (interface 4, stereo 48 kHz) ---
+[XonarSe.I.WaveCapture]
+AddReg=XonarSe.I.WaveCapture.AddReg
+[XonarSe.I.WaveCapture.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.WaveCapture.szPname%
+
+[XonarSe.I.TopologyCapture]
+AddReg=XonarSe.I.TopologyCapture.AddReg, XonarSe.EP.Capture.AddReg
+[XonarSe.I.TopologyCapture.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.TopologyCapture.szPname%
+
+; Format par defaut : 2 canaux, 16/16 bits, 48 kHz (identique au blob S/PDIF).
+[XonarSe.EP.Capture.AddReg]
+HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
+HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,%REG_DWORD%,0x1
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,63,00,c0,00,00,00,fe,ff,02,00,80,bb,00,00,00,ee,02,00,04,00,10,00,16,00,10,00,03,00,00,00,01,00,00,00,00,00,10,00,80,00,00,aa,00,38,9b,71
+
+; --- Entree ligne (interface 4, stereo 48 kHz) ---
+; NOTE : partage l'endpoint ISO IN 0x88 avec le micro 1 via le selecteur SU20 : micro 1 et
+; ligne sont mutuellement exclusifs (un seul flux de capture a la fois sur l'interface 4).
+[XonarSe.I.WaveLine]
+AddReg=XonarSe.I.WaveLine.AddReg
+[XonarSe.I.WaveLine.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.WaveLine.szPname%
+
+[XonarSe.I.TopologyLine]
+AddReg=XonarSe.I.TopologyLine.AddReg, XonarSe.EP.Line.AddReg
+[XonarSe.I.TopologyLine.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.TopologyLine.szPname%
+
+; Format par defaut : 2 canaux, 16/16 bits, 48 kHz (identique au blob S/PDIF).
+[XonarSe.EP.Line.AddReg]
+HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
+HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,%REG_DWORD%,0x1
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,63,00,c0,00,00,00,fe,ff,02,00,80,bb,00,00,00,ee,02,00,04,00,10,00,16,00,10,00,03,00,00,00,01,00,00,00,00,00,10,00,80,00,00,aa,00,38,9b,71
+
+; --- Micro 2 (interface 5 dediee, stereo 48 kHz ; endpoint ISO IN 0x89 separe, independant) ---
+[XonarSe.I.WaveMic2]
+AddReg=XonarSe.I.WaveMic2.AddReg
+[XonarSe.I.WaveMic2.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.WaveMic2.szPname%
+
+[XonarSe.I.TopologyMic2]
+AddReg=XonarSe.I.TopologyMic2.AddReg, XonarSe.EP.Mic2.AddReg
+[XonarSe.I.TopologyMic2.AddReg]
+HKR,,CLSID,,%Proxy.CLSID%
+HKR,,FriendlyName,,%XonarSe.TopologyMic2.szPname%
+
+; Format par defaut : 2 canaux, 16/16 bits, 48 kHz (identique au blob S/PDIF).
+[XonarSe.EP.Mic2.AddReg]
+HKR,EP\0,%PKEY_AudioEndpoint_Association%,,%KSNODETYPE_ANY%
+HKR,EP\0,%PKEY_AudioEndpoint_Supports_EventDriven_Mode%,%REG_DWORD%,0x1
+HKR,EP\0,%PKEY_AudioEngine_OEMFormat%,%REG_BINARY%,41,00,63,00,c0,00,00,00,fe,ff,02,00,80,bb,00,00,00,ee,02,00,04,00,10,00,16,00,10,00,03,00,00,00,01,00,00,00,00,00,10,00,80,00,00,aa,00,38,9b,71
+
+[Strings]
+; non localisables
+Proxy.CLSID="{17CCA71B-ECD7-11D0-B908-00A0C9223196}"
+KSCATEGORY_AUDIO="{6994AD04-93EF-11D0-A3CC-00A0C9223196}"
+KSCATEGORY_RENDER="{65E8773E-8F56-11D0-A3B9-00A0C9223196}"
+KSCATEGORY_CAPTURE="{65E8773D-8F56-11D0-A3B9-00A0C9223196}"
+KSCATEGORY_REALTIME="{EB115FFC-10C8-4964-831D-6DCB02E6F23F}"
+KSCATEGORY_TOPOLOGY="{DDA54A40-1E4C-11D1-A050-405705C10000}"
+KSNODETYPE_ANY="{00000000-0000-0000-0000-000000000000}"
+PKEY_AudioEndpoint_Association="{1DA5D803-D492-4EDD-8C23-E0C0FFEE7F0E},2"
+PKEY_AudioEngine_OEMFormat="{E4870E26-3CC5-4CD2-BA46-CA0A9A70ED04},3"
+; Le miniport WaveRT implemente IMiniportWaveRTStreamNotification (mode evenementiel).
+PKEY_AudioEndpoint_Supports_EventDriven_Mode="{1DA5D803-D492-4EDD-8C23-E0C0FFEE7F0E},7"
+REG_DWORD=0x00010001
+REG_BINARY=0x00000001
+
+KSNAME_WaveSpeaker="WaveSpeaker"
+KSNAME_TopologySpeaker="TopologySpeaker"
+KSNAME_WaveHeadphone="WaveHeadphone"
+KSNAME_TopologyHeadphone="TopologyHeadphone"
+KSNAME_WaveSpdif="WaveSpdif"
+KSNAME_TopologySpdif="TopologySpdif"
+KSNAME_WaveCapture="WaveCapture"
+KSNAME_TopologyCapture="TopologyCapture"
+KSNAME_WaveLine="WaveLine"
+KSNAME_TopologyLine="TopologyLine"
+KSNAME_WaveMic2="WaveMic2"
+KSNAME_TopologyMic2="TopologyMic2"
+
+; localisables
+ProviderName="Xonar SE Open Driver (projet open source)"
+ManufacturerName="Xonar SE Open Driver"
+DiskName="Xonar SE Open Driver - disque d'installation"
+XonarSe.DeviceDesc="ASUS Xonar SE (pilote ouvert, experimental)"
+XonarSe.ServiceDesc="Xonar SE Open Driver"
+XonarSe.WaveSpeaker.szPname="Xonar SE Haut-parleurs (flux)"
+XonarSe.TopologySpeaker.szPname="Xonar SE Haut-parleurs"
+XonarSe.WaveHeadphone.szPname="Xonar SE Casque (flux)"
+XonarSe.TopologyHeadphone.szPname="Xonar SE Casque"
+XonarSe.WaveSpdif.szPname="Xonar SE S/PDIF (flux)"
+XonarSe.TopologySpdif.szPname="Xonar SE S/PDIF"
+XonarSe.WaveCapture.szPname="Xonar SE Entree micro (flux)"
+XonarSe.TopologyCapture.szPname="Xonar SE Entree micro"
+XonarSe.WaveLine.szPname="Xonar SE Entree ligne (flux)"
+XonarSe.TopologyLine.szPname="Xonar SE Entree ligne"
+XonarSe.WaveMic2.szPname="Xonar SE Microphone 2 (flux)"
+XonarSe.TopologyMic2.szPname="Xonar SE Microphone 2"

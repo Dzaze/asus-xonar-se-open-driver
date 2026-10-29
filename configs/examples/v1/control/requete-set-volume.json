@@ -1,0 +1,13 @@
+{
+  "apiMajor": 1,
+  "apiMinor": 0,
+  "requestId": "0b7c86e4-2d1b-4c55-9a43-2c1f6a1e0006",
+  "endpointKey": "usb-0b05-189d-mi00:speakers:1",
+  "expectedRevision": 5,
+  "command": "SetHardwareVolume",
+  "payload": {
+    "control": "volume",
+    "ksChannel": 3,
+    "levelDb": -12.75
+  }
+}

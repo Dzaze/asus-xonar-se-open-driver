@@ -1,0 +1,94 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "vendor": {
+    "xonar/notes": {
+      "cmakeUserPresets": "Points réservés à un CMakeUserPresets.json LOCAL (ignoré par git, cf. .gitignore). N'y mettre AUCUN secret EV/signature et aucune commande d'installation. Usages prévus : surcharger XONAR_WDK_VERSION et activer XONAR_BUILD_DRIVER=ON sur un poste équipé du WDK ; activer XONAR_BUILD_APO / XONAR_BUILD_AUDIO_CONTROL une fois ces couloirs livrés ; choisir un autre générateur/compilateur ou un binaryDir hors arbre ; régler XONAR_WARNINGS_AS_ERRORS. Les presets ci-dessous restent portables (WDK jamais requis) ; héritez-en via \"inherits\" dans votre fichier local.",
+      "aucuneInstallation": "Aucun preset ne déclenche install/signature/déploiement/mode test : ces opérations ne sont pas dans le graphe de build (E0-05)."
+    }
+  },
+  "configurePresets": [
+    {
+      "name": "msvc-ninja-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "cl",
+        "XONAR_BUILD_DRIVER": "OFF"
+      },
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    },
+    {
+      "name": "windows-portable",
+      "displayName": "Windows portable (sans WDK, sans tests)",
+      "description": "Configuration portable minimale : composants portables + outils, pilote OFF. Ne requiert jamais le WDK. A lancer depuis un Developer PowerShell (vcvars chargé) ou via scripts/build.ps1.",
+      "inherits": "msvc-ninja-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "XONAR_BUILD_TESTS": "OFF",
+        "XONAR_BUILD_TOOLS": "ON"
+      }
+    },
+    {
+      "name": "windows-tests",
+      "displayName": "Windows avec tests (sans WDK)",
+      "description": "Configuration de validation : tests + outils + non-régression + contrats + codec de profils, pilote OFF. Ne requiert pas le WDK.",
+      "inherits": "msvc-ninja-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "XONAR_BUILD_TESTS": "ON",
+        "XONAR_BUILD_TOOLS": "ON",
+        "XONAR_BUILD_AUDIO_CONTROL": "ON"
+      }
+    },
+    {
+      "name": "msvc-ninja-debug",
+      "displayName": "MSVC + Ninja (Debug)",
+      "description": "A lancer depuis un Developer PowerShell ou via scripts/build.ps1 (vcvars charge).",
+      "inherits": "msvc-ninja-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "XONAR_BUILD_TESTS": "ON",
+        "XONAR_BUILD_TOOLS": "ON",
+        "XONAR_BUILD_AUDIO_CONTROL": "ON"
+      }
+    },
+    {
+      "name": "msvc-ninja-release",
+      "displayName": "MSVC + Ninja (Release)",
+      "inherits": "msvc-ninja-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "XONAR_BUILD_TESTS": "ON",
+        "XONAR_BUILD_TOOLS": "ON",
+        "XONAR_BUILD_AUDIO_CONTROL": "ON"
+      }
+    },
+    {
+      "name": "linux-gcc-debug",
+      "displayName": "GCC/Clang + Ninja (Debug) - composants portables uniquement",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "XONAR_BUILD_TESTS": "ON",
+        "XONAR_BUILD_TOOLS": "ON"
+      },
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "windows-portable", "configurePreset": "windows-portable" },
+    { "name": "windows-tests", "configurePreset": "windows-tests" },
+    { "name": "msvc-ninja-debug", "configurePreset": "msvc-ninja-debug" },
+    { "name": "msvc-ninja-release", "configurePreset": "msvc-ninja-release" },
+    { "name": "linux-gcc-debug", "configurePreset": "linux-gcc-debug" }
+  ],
+  "testPresets": [
+    { "name": "windows-tests", "configurePreset": "windows-tests", "output": { "outputOnFailure": true } },
+    { "name": "msvc-ninja-debug", "configurePreset": "msvc-ninja-debug", "output": { "outputOnFailure": true } },
+    { "name": "msvc-ninja-release", "configurePreset": "msvc-ninja-release", "output": { "outputOnFailure": true } },
+    { "name": "linux-gcc-debug", "configurePreset": "linux-gcc-debug", "output": { "outputOnFailure": true } }
+  ]
+}

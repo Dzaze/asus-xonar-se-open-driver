@@ -1,0 +1,9 @@
+{
+  "epoch": 7,
+  "generation": 1,
+  "testId": "5e0f3a52-8c1d-4f7e-b1a2-3c4d5e6f7a80",
+  "channelBit": 8,
+  "frequencyHz": 60,
+  "levelDb": -30,
+  "expiresQpc": 120000000
+}

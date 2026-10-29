@@ -1,0 +1,128 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Thème « cockpit » du centre de contrôle Xonar SE : sombre, accents turquoise.
+        Tokens de couleurs + styles simples (sans VisualState : la nav et les onglets
+        segmentés sont construits en code pour maîtriser la sélection sans conflit de
+        namescope XAML). Thème sombre uniquement.
+    -->
+
+    <!-- ============================ COULEURS ============================ -->
+    <Color x:Key="CockpitBgTop">#0C111A</Color>
+    <Color x:Key="CockpitBgBottom">#070A10</Color>
+    <Color x:Key="CockpitSurface">#111824</Color>
+    <Color x:Key="CockpitSurface2">#161F2D</Color>
+    <Color x:Key="CockpitSurfaceInset">#0B0F17</Color>
+    <Color x:Key="CockpitBorder">#1F2A3A</Color>
+    <Color x:Key="CockpitBorderSubtle">#17202C</Color>
+
+    <Color x:Key="CockpitAccent">#35D6CE</Color>
+    <Color x:Key="CockpitAccentBright">#5BEEE6</Color>
+    <Color x:Key="CockpitAccentDeep">#17807B</Color>
+    <Color x:Key="CockpitAccentGlow">#2A9D98</Color>
+
+    <Color x:Key="CockpitTextPrimary">#E9F0F6</Color>
+    <Color x:Key="CockpitTextSecondary">#93A2B2</Color>
+    <Color x:Key="CockpitTextTertiary">#5D6B7B</Color>
+    <Color x:Key="CockpitWarning">#E6B145</Color>
+    <Color x:Key="CockpitDanger">#E8694A</Color>
+
+    <!-- ============================ PINCEAUX ============================ -->
+    <SolidColorBrush x:Key="CockpitSurfaceBrush" Color="{StaticResource CockpitSurface}" />
+    <SolidColorBrush x:Key="CockpitSurface2Brush" Color="{StaticResource CockpitSurface2}" />
+    <SolidColorBrush x:Key="CockpitSurfaceInsetBrush" Color="{StaticResource CockpitSurfaceInset}" />
+    <SolidColorBrush x:Key="CockpitBorderBrush" Color="{StaticResource CockpitBorder}" />
+    <SolidColorBrush x:Key="CockpitBorderSubtleBrush" Color="{StaticResource CockpitBorderSubtle}" />
+    <SolidColorBrush x:Key="CockpitAccentBrush" Color="{StaticResource CockpitAccent}" />
+    <SolidColorBrush x:Key="CockpitAccentBrightBrush" Color="{StaticResource CockpitAccentBright}" />
+    <SolidColorBrush x:Key="CockpitAccentDeepBrush" Color="{StaticResource CockpitAccentDeep}" />
+    <SolidColorBrush x:Key="CockpitTextPrimaryBrush" Color="{StaticResource CockpitTextPrimary}" />
+    <SolidColorBrush x:Key="CockpitTextSecondaryBrush" Color="{StaticResource CockpitTextSecondary}" />
+    <SolidColorBrush x:Key="CockpitTextTertiaryBrush" Color="{StaticResource CockpitTextTertiary}" />
+    <SolidColorBrush x:Key="CockpitWarningBrush" Color="{StaticResource CockpitWarning}" />
+    <SolidColorBrush x:Key="CockpitDangerBrush" Color="{StaticResource CockpitDanger}" />
+    <SolidColorBrush x:Key="CockpitAccentSoftBrush" Color="{StaticResource CockpitAccent}" Opacity="0.14" />
+    <SolidColorBrush x:Key="CockpitAccentSelBrush" Color="{StaticResource CockpitAccent}" Opacity="0.16" />
+
+    <!-- Fond de la fenêtre : léger dégradé vertical -->
+    <LinearGradientBrush x:Key="CockpitWindowBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Offset="0" Color="{StaticResource CockpitBgTop}" />
+        <GradientStop Offset="1" Color="{StaticResource CockpitBgBottom}" />
+    </LinearGradientBrush>
+
+    <!-- Dégradé turquoise pour arcs/barres (bas sombre -> haut clair) -->
+    <LinearGradientBrush x:Key="CockpitAccentGradient" StartPoint="0,1" EndPoint="0,0">
+        <GradientStop Offset="0" Color="{StaticResource CockpitAccentDeep}" />
+        <GradientStop Offset="1" Color="{StaticResource CockpitAccentBright}" />
+    </LinearGradientBrush>
+
+    <!-- ============================ TYPOGRAPHIE ============================ -->
+    <Style x:Key="CockpitH1" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="30" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource CockpitTextPrimaryBrush}" />
+    </Style>
+    <Style x:Key="CockpitH2" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource CockpitTextPrimaryBrush}" />
+    </Style>
+    <Style x:Key="CockpitLabel" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource CockpitTextSecondaryBrush}" />
+    </Style>
+    <Style x:Key="CockpitBody" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource CockpitTextPrimaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style x:Key="CockpitCaption" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="Foreground" Value="{StaticResource CockpitTextTertiaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- ============================ CARTE / PANNEAU ============================ -->
+    <Style x:Key="CockpitCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CockpitSurfaceBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CockpitBorderSubtleBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="18" />
+    </Style>
+
+    <!-- ============================ BOUTONS ============================ -->
+    <Style x:Key="CockpitGhostButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource CockpitSurface2Brush}" />
+        <Setter Property="Foreground" Value="{StaticResource CockpitTextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CockpitBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style x:Key="CockpitAccentButton" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource CockpitAccentSoftBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource CockpitAccentBrightBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CockpitAccentDeepBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="9" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- Badge « Prévu » / état -->
+    <Style x:Key="CockpitBadge" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CockpitSurface2Brush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CockpitBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="Padding" Value="8,2" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+</ResourceDictionary>

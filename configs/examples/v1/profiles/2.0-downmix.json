@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "profileId": "c96e4179-24d1-4954-b3b5-968dc5d64e2e",
+  "revision": 1,
+  "name": "Ampli 2.0 — downmix",
+  "endpointRole": "speakers",
+  "listeningMode": "2.0",
+  "sourcePolicy": "autoDeclaredLayout",
+  "routing": {},
+  "output": {
+    "downmix": {
+      "centerGainDb": -3,
+      "surroundGainDb": -3,
+      "includeLfe": true,
+      "lfeGainDb": -9,
+      "headroomDb": -6
+    }
+  }
+}

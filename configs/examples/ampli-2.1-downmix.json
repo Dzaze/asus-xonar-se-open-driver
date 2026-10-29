@@ -1,0 +1,24 @@
+{
+  "$schema": "../profiles/profile.schema.json",
+  "name": "Ampli en position 2.1 — downmix 5.1 vers stéréo",
+  "description": "À utiliser quand le bouton physique de l'ampli est sur 2.1 (synchronisation manuelle, aucun retour d'état). Downmix ITU-R BS.775 : centre et surrounds à -3 dB, LFE ignoré (l'ampli fait son propre bass management), headroom -4.5 dB, limiteur actif.",
+  "mode": "Downmix6to2",
+  "sampleRate": 48000,
+  "inputMask": 1551,
+  "outputMask": 3,
+  "masterGainDb": 0,
+  "channelGainDb": [0, 0, 0, 0, 0, 0, 0, 0],
+  "channelDelayMs": [0, 0, 0, 0, 0, 0, 0, 0],
+  "channelMute": [false, false, false, false, false, false, false, false],
+  "downmix": {
+    "centerGainDb": -3,
+    "surroundGainDb": -3,
+    "includeLfe": false,
+    "lfeGainDb": -6,
+    "headroomDb": -4.5
+  },
+  "bassManagement": { "enabled": false, "crossoverHz": 80, "highPassSatellites": true, "sumToLfe": true, "sumToLfeGainDb": 0 },
+  "limiter": { "enabled": true, "ceilingDb": -0.3, "releaseMs": 80 },
+  "gainRampMs": 20,
+  "maxDelayMs": 50
+}

@@ -1,0 +1,84 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Socle WinUI 3 / C# du centre de contrôle (item E2-05).
+    Version Windows App SDK / .NET retenue et ÉPINGLÉE ci-dessous.
+
+    - .NET 8.0 (LTS, sorti en novembre 2023) :
+      cible « net8.0-windows10.0.19041.0 ». Choix vérifiable sur
+      https://dotnet.microsoft.com/en-us/download/dotnet/8.0
+    - Microsoft.WindowsAppSDK 1.6.240923002 (1.6.0 stable) :
+      version réelle publiée sur NuGet. Source :
+      https://www.nuget.org/packages/Microsoft.WindowsAppSDK
+      Numéro de build « 240923002 » = version stable 1.6 ; À CONFIRMER au
+      premier `dotnet restore` si le flux local ne résout pas ce build exact
+      (dans ce cas, épingler la dernière version stable 1.6.x disponible et
+      mettre à jour Properties/dependencies.manifest.json).
+    - Microsoft.Windows.SDK.BuildTools 10.0.22621.3233 : À CONFIRMER au build.
+
+    Application NON packagée (WindowsPackageType=None), dépendante du framework.
+    Le bootstrap du runtime est demandé via WindowsAppSDKBootstrapInitialize ;
+    propriété À CONFIRMER selon la version 1.6 du SDK.
+  -->
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RootNamespace>Xonar.ControlCenter</RootNamespace>
+    <AssemblyName>Xonar.ControlCenter</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKBootstrapInitialize>true</WindowsAppSDKBootstrapInitialize>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Icône de l'exe et de la fenêtre (onde turquoise). -->
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Retarget 1.6 -> 1.8 : le CoreMessaging de la 1.6 plante (STATUS_DLL_INIT_FAILED)
+         sur Windows 11 build 26200 ; la 1.8 est alignée avec un runtime installé. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705" />
+    <!-- Icône de la zone de notification (tray). H.NotifyIcon est la voie standard
+         pour une icône de tray en WinUI 3 (NotifyIcon natif non exposé). -->
+    <PackageReference Include="H.NotifyIcon.WinUI" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Icône disponible au runtime (tray) via ms-appx:///Assets/app.ico. -->
+    <Content Include="Assets\app.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- DTO générés par E0-02 : consommés, jamais réécrits à la main. -->
+    <Compile Include="../../contracts/generated/csharp/Xonar.Contracts.V1.g.cs"
+             Link="Contracts/Xonar.Contracts.V1.g.cs" />
+  </ItemGroup>
+
+  <!-- Le publish .NET ne reprend pas les XBF/PRI générés par WinUI dans TargetDir. -->
+  <Target Name="PublishXonarXamlResources" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <_XonarPublishXaml Include="$(TargetDir)**\*.xbf" />
+      <ResolvedFileToPublish Include="@(_XonarPublishXaml)">
+        <RelativePath>%(_XonarPublishXaml.RecursiveDir)%(_XonarPublishXaml.Filename)%(_XonarPublishXaml.Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+      <ResolvedFileToPublish Include="$(TargetDir)$(AssemblyName).pri" Condition="Exists('$(TargetDir)$(AssemblyName).pri')">
+        <RelativePath>$(AssemblyName).pri</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
+</Project>

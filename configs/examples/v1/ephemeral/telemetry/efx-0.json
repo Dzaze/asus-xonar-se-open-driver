@@ -1,0 +1,17 @@
+{
+  "epoch": 7,
+  "instanceId": "efx-0",
+  "sequence": 1024,
+  "qpc": 100000000,
+  "outputPeakDbfs": [
+    -12.5,
+    -12.7,
+    -18,
+    -24,
+    -200,
+    -200
+  ],
+  "limiterReductionDb": 0.4,
+  "nonFiniteFrames": 0,
+  "lostSamples": 0
+}

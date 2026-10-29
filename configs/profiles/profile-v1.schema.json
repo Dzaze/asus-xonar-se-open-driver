@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xonar-se-open-driver/configs/profiles/profile-v1.schema.json",
+  "title": "Profil Xonar SE v1",
+  "description": "Document de profil v1 (C3) et enveloppe CAPX (#/$defs/CapxDocument). Généré depuis contracts/manifest.json ; ne pas éditer.",
+  "$comment": "Généré par contracts/generate.py depuis contracts/manifest.json (sha256 45fee5376e713c752dbf22bec73fca519f555bbcf341fce018e6d997e3a032a8). Ne pas éditer.",
+  "$ref": "#/$defs/ProfileDocument",
+  "$defs": {
+    "ProfileDocument": {
+      "description": "Document de profil v1 : bibliothèque, import/export et charge utile CAPX. Pas de sampleRate, de masque, de ChannelTest, de chemin ni de commande noyau.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "profileId",
+        "revision",
+        "endpointRole",
+        "listeningMode",
+        "sourcePolicy",
+        "routing",
+        "output"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "const": 1
+        },
+        "profileId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "revision": {
+          "description": "Révision du document, croissante, ≥ 1.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "endpointRole": {
+          "$ref": "#/$defs/EndpointRole"
+        },
+        "listeningMode": {
+          "$ref": "#/$defs/ListeningMode"
+        },
+        "sourcePolicy": {
+          "$ref": "#/$defs/SourcePolicy"
+        },
+        "routing": {
+          "$ref": "#/$defs/RoutingSettings"
+        },
+        "output": {
+          "$ref": "#/$defs/OutputSettings"
+        }
+      }
+    },
+    "EndpointRole": {
+      "description": "Rôle d'endpoint ; v1 : haut-parleurs seulement.",
+      "type": "string",
+      "enum": [
+        "speakers"
+      ]
+    },
+    "ListeningMode": {
+      "description": "Mode de sortie persistant. Sortie Windows toujours 6 canaux / 0x60F.",
+      "type": "string",
+      "enum": [
+        "5.1",
+        "upmix",
+        "2.1",
+        "2.0"
+      ]
+    },
+    "SourcePolicy": {
+      "description": "Politique par flux négocié demandée par le profil.",
+      "type": "string",
+      "enum": [
+        "preserve",
+        "autoDeclaredLayout",
+        "forceStereoFrontPair"
+      ]
+    },
+    "RoutingSettings": {
+      "description": "Paramètres du RoutingStage SFX (matrice + dérivation LFE).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "upmix": {
+          "$ref": "#/$defs/UpmixSettings"
+        }
+      }
+    },
+    "UpmixSettings": {
+      "description": "Upmix 2→6 du SFX.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "centerGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 0,
+          "default": -3
+        },
+        "surroundGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 0,
+          "default": -6
+        },
+        "deriveLfe": {
+          "type": "boolean",
+          "default": true
+        },
+        "lfeGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 0,
+          "default": -6
+        },
+        "lfeLowPassHz": {
+          "description": "Dérivation upmix 40…250 Hz.",
+          "type": "number",
+          "minimum": 40,
+          "maximum": 250,
+          "default": 120
+        }
+      }
+    },
+    "OutputSettings": {
+      "description": "Compensation de sortie EFX ; groupes absents normalisés aux défauts C++.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "masterGainDb": {
+          "type": "number",
+          "minimum": -60,
+          "maximum": 6,
+          "default": 0
+        },
+        "channelGainDb": {
+          "description": "Trims indexés par Channel (FL FR FC LFE BL BR SL SR).",
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -60,
+            "maximum": 12
+          },
+          "minItems": 8,
+          "maxItems": 8,
+          "default": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "channelDelayMs": {
+          "description": "Délais 0…50 ms, chacun ≤ maxDelayMs.",
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 50
+          },
+          "minItems": 8,
+          "maxItems": 8,
+          "default": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        "channelMute": {
+          "type": "array",
+          "items": {
+            "type": "boolean"
+          },
+          "minItems": 8,
+          "maxItems": 8,
+          "default": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        "eq": {
+          "description": "eq[8][10] indexé par Channel.",
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/EqBand"
+            },
+            "minItems": 10,
+            "maxItems": 10
+          },
+          "minItems": 8,
+          "maxItems": 8
+        },
+        "downmix": {
+          "$ref": "#/$defs/DownmixSettings"
+        },
+        "twoPointOne": {
+          "$ref": "#/$defs/TwoPointOneSettings"
+        },
+        "bassManagement": {
+          "$ref": "#/$defs/BassManagementSettings"
+        },
+        "limiter": {
+          "$ref": "#/$defs/LimiterSettings"
+        },
+        "gainRampMs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 20
+        },
+        "maxDelayMs": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "default": 50
+        }
+      }
+    },
+    "EqBand": {
+      "description": "Bande EQ peaking.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "frequencyHz": {
+          "description": "10…20 000 Hz et strictement sous Nyquist de la connexion.",
+          "type": "number",
+          "minimum": 10,
+          "maximum": 20000,
+          "default": 1000
+        },
+        "q": {
+          "type": "number",
+          "maximum": 20,
+          "exclusiveMinimum": 0,
+          "default": 1
+        },
+        "gainDb": {
+          "type": "number",
+          "minimum": -24,
+          "maximum": 12,
+          "default": 0
+        }
+      }
+    },
+    "DownmixSettings": {
+      "description": "Downmix 5.1 → 2.0 (ITU-R BS.775).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "centerGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 0,
+          "default": -3
+        },
+        "surroundGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 0,
+          "default": -3
+        },
+        "includeLfe": {
+          "type": "boolean",
+          "default": false
+        },
+        "lfeGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 0,
+          "default": -6
+        },
+        "headroomDb": {
+          "type": "number",
+          "minimum": -12,
+          "maximum": 0,
+          "default": -4.5
+        }
+      }
+    },
+    "TwoPointOneSettings": {
+      "description": "2.1 virtuel sur la sortie 5.1.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "lfeGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 6,
+          "default": 0
+        },
+        "lfeLowPassHz": {
+          "type": "number",
+          "minimum": 40,
+          "maximum": 200,
+          "default": 80
+        },
+        "includeSourceLfe": {
+          "type": "boolean",
+          "default": true
+        },
+        "sourceLfeGainDb": {
+          "type": "number",
+          "minimum": -30,
+          "maximum": 6,
+          "default": 0
+        }
+      }
+    },
+    "BassManagementSettings": {
+      "description": "Bass management de l'EFX.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "crossoverHz": {
+          "type": "number",
+          "minimum": 40,
+          "maximum": 200,
+          "default": 80
+        },
+        "highPassSatellites": {
+          "type": "boolean",
+          "default": true
+        },
+        "sumToLfe": {
+          "type": "boolean",
+          "default": true
+        },
+        "sumToLfeGainDb": {
+          "type": "number",
+          "minimum": -20,
+          "maximum": 6,
+          "default": 0
+        }
+      }
+    },
+    "LimiterSettings": {
+      "description": "Limiteur crête de l'EFX.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "ceilingDb": {
+          "type": "number",
+          "minimum": -12,
+          "maximum": 0,
+          "default": -0.3
+        },
+        "releaseMs": {
+          "type": "number",
+          "minimum": 5,
+          "maximum": 1000,
+          "default": 80
+        }
+      }
+    },
+    "CapxDocument": {
+      "description": "Document complet autonome publié dans chaque magasin CAPX ; payload normalisé.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contractMajor",
+        "contractMinor",
+        "epoch",
+        "generation",
+        "payload"
+      ],
+      "properties": {
+        "contractMajor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535,
+          "const": 1
+        },
+        "contractMinor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "payload": {
+          "$ref": "#/$defs/ProfileDocument"
+        }
+      }
+    }
+  }
+}

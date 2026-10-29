@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "profileId": "3f1c0a6e-5b7d-4e2a-9c8b-1d2e3f4a5b03",
+  "revision": 1,
+  "name": "Pass-through 5.1",
+  "description": "Source 5.1 native (layout latéral Windows 0x60F) vers sortie 5.1 : canaux et niveaux préservés, limiteur de sécurité actif.",
+  "endpointRole": "speakers",
+  "listeningMode": "5.1",
+  "sourcePolicy": "preserve",
+  "routing": {},
+  "output": {
+    "masterGainDb": 0,
+    "channelGainDb": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "channelDelayMs": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "channelMute": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "bassManagement": {
+      "enabled": false,
+      "crossoverHz": 80,
+      "highPassSatellites": true,
+      "sumToLfe": true,
+      "sumToLfeGainDb": 0
+    },
+    "limiter": {
+      "enabled": true,
+      "ceilingDb": -0.3,
+      "releaseMs": 80
+    },
+    "gainRampMs": 20,
+    "maxDelayMs": 50
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "apiMajor": 1,
+  "apiMinor": 0,
+  "requestId": "0b7c86e4-2d1b-4c55-9a43-2c1f6a1e0003",
+  "endpointKey": "usb-0b05-189d-mi00:speakers:1",
+  "command": "ValidateProfile",
+  "payload": {
+    "profile": {
+      "schemaVersion": 1,
+      "profileId": "40cb4ea8-4774-4cd1-9d29-5d305412d49e",
+      "revision": 1,
+      "endpointRole": "speakers",
+      "listeningMode": "upmix",
+      "sourcePolicy": "autoDeclaredLayout",
+      "routing": {
+        "upmix": {
+          "centerGainDb": -3,
+          "surroundGainDb": -6,
+          "deriveLfe": true,
+          "lfeGainDb": -6,
+          "lfeLowPassHz": 120
+        }
+      },
+      "output": {
+        "masterGainDb": 0,
+        "channelGainDb": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "channelDelayMs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "channelMute": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "bassManagement": {
+          "enabled": false,
+          "crossoverHz": 80,
+          "highPassSatellites": true,
+          "sumToLfe": true,
+          "sumToLfeGainDb": 0
+        },
+        "limiter": {
+          "enabled": true,
+          "ceilingDb": -0.3,
+          "releaseMs": 80
+        }
+      }
+    }
+  }
+}

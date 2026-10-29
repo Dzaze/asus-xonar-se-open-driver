@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Tests du centre de contrôle (items E2-05, E2-06, E2-07). Projet console .NET 8
+    SANS WinUI et SANS carte : il compile les services et modèles de vue du centre
+    de contrôle (sources liées) et les exécute contre le faux agent. Aucune
+    dépendance de test externe (mini-cadre maison), donc lançable avec
+    « dotnet test » ou « dotnet run » sans restauration de paquets tiers.
+  -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>Xonar.ControlCenter.Tests</RootNamespace>
+    <AssemblyName>Xonar.ControlCenter.Tests</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- DTO générés par E0-02 : consommés, jamais réécrits. -->
+    <Compile Include="../../../contracts/generated/csharp/Xonar.Contracts.V1.g.cs"
+             Link="Contracts/Xonar.Contracts.V1.g.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Sources partagées du centre de contrôle (services + modèles de vue sans
+         dépendance WinUI). Les pages XAML ne sont PAS incluses : elles exigent
+         le Windows App SDK et ne sont pas nécessaires à la logique testée. -->
+    <Compile Include="../../../apps/control-center/Services/*.cs"
+             LinkBase="Services" />
+    <Compile Include="../../../apps/control-center/Services/Localization/*.cs"
+             LinkBase="Services/Localization" />
+    <Compile Include="../../../apps/control-center/Profiles/ProfileEditorViewModel.cs"
+             Link="Profiles/ProfileEditorViewModel.cs" />
+    <Compile Include="../../../apps/control-center/Calibration/CalibrationViewModel.cs"
+             Link="Calibration/CalibrationViewModel.cs" />
+    <Compile Include="../../../apps/control-center/Status/StalenessEvaluator.cs"
+             Link="Status/StalenessEvaluator.cs" />
+    <Compile Include="../../../apps/control-center/Status/StatusViewModel.cs"
+             Link="Status/StatusViewModel.cs" />
+    <Compile Include="../../../apps/control-center/Shell/AppShellViewModel.cs"
+             Link="Shell/AppShellViewModel.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test.cs, ShellTests.cs et Program.cs sont dans le dossier du projet : le SDK
+         les inclut déjà par défaut (EnableDefaultCompileItems). On ne liste donc ici
+         que les fichiers HORS dossier, non pris par le glob par défaut, sinon doublon
+         (NETSDK1022). -->
+    <Compile Include="../profiles/ProfilesTests.cs" Link="ProfilesTests.cs" />
+    <Compile Include="../status/StatusTests.cs" Link="StatusTests.cs" />
+  </ItemGroup>
+
+</Project>

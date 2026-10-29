@@ -1,0 +1,23 @@
+{
+  "$schema": "../profiles/profile.schema.json",
+  "name": "Pass-through 5.1",
+  "description": "Source 5.1 native (layout latéral Windows 0x60F) vers sortie 5.1 : canaux et niveaux préservés, limiteur de sécurité actif.",
+  "mode": "PassThrough",
+  "sampleRate": 48000,
+  "inputMask": 1551,
+  "outputMask": 1551,
+  "masterGainDb": 0,
+  "channelGainDb": [0, 0, 0, 0, 0, 0, 0, 0],
+  "channelDelayMs": [0, 0, 0, 0, 0, 0, 0, 0],
+  "channelMute": [false, false, false, false, false, false, false, false],
+  "bassManagement": {
+    "enabled": false,
+    "crossoverHz": 80,
+    "highPassSatellites": true,
+    "sumToLfe": true,
+    "sumToLfeGainDb": 0
+  },
+  "limiter": { "enabled": true, "ceilingDb": -0.3, "releaseMs": 80 },
+  "gainRampMs": 20,
+  "maxDelayMs": 50
+}

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "profileId": "3f1c0a6e-5b7d-4e2a-9c8b-1d2e3f4a5b01",
+  "revision": 1,
+  "name": "2.1 virtuel (Windows et ampli restent en 5.1)",
+  "description": "Mode 2.1 fabriqué par le DSP sur le câblage 5.1 : avant gauche/droite intacts, caisson alimenté par un passe-bas Linkwitz-Riley 4 à 80 Hz de la somme (L+R)/2, centre et surrounds silencieux. Une source 5.1 est d'abord ramenée en stéréo (ITU-R BS.775) et son LFE d'origine est conservé. Ne pas activer sumToLfe du bass management : le mode dérive déjà le caisson.",
+  "endpointRole": "speakers",
+  "listeningMode": "2.1",
+  "sourcePolicy": "preserve",
+  "routing": {},
+  "output": {
+    "masterGainDb": 0,
+    "channelGainDb": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "channelDelayMs": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "channelMute": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "downmix": {
+      "centerGainDb": -3,
+      "surroundGainDb": -3,
+      "includeLfe": false,
+      "lfeGainDb": -6,
+      "headroomDb": -4.5
+    },
+    "twoPointOne": {
+      "lfeGainDb": 0,
+      "lfeLowPassHz": 80,
+      "includeSourceLfe": true,
+      "sourceLfeGainDb": 0
+    },
+    "bassManagement": {
+      "enabled": false,
+      "crossoverHz": 80,
+      "highPassSatellites": true,
+      "sumToLfe": false,
+      "sumToLfeGainDb": 0
+    },
+    "limiter": {
+      "enabled": true,
+      "ceilingDb": -0.3,
+      "releaseMs": 80
+    },
+    "gainRampMs": 20,
+    "maxDelayMs": 50
+  }
+}

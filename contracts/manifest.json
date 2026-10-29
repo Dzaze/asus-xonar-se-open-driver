@@ -1,0 +1,613 @@
+{
+  "manifestVersion": 1,
+  "title": "Manifeste des contrats d'interface Xonar SE Open Driver v1",
+  "description": "Source unique des contrats C1 à C8 (docs/backlog.md §1). Les schémas JSON v1, les DTO C++ et C# et le test de conformité DSP sont générés depuis ce fichier par contracts/generate.py ; ne jamais les éditer à la main. Toute évolution de version majeure passe par un ADR, une migration et des tests de compatibilité. Les GUID ci-dessous sont attribués une seule fois par E0-02 et figés.",
+  "backlogVersion": "1.0 — 28 octobre 2026",
+  "contracts": [
+    { "id": "C1", "title": "API DSP", "major": 1, "minor": 0, "status": "figé", "section": "§1.2" },
+    { "id": "C2", "title": "Graphe audio et sélection de profil", "major": 1, "minor": 0, "status": "figé", "section": "§1.3" },
+    { "id": "C3", "title": "Persistance, profils et autorité de l'état", "major": 1, "minor": 0, "status": "figé", "section": "§1.4" },
+    { "id": "C4", "title": "Commandes et publication temps réel", "major": 1, "minor": 0, "status": "figé", "section": "§1.5" },
+    { "id": "C5", "title": "Propriétés KS et contrôle matériel", "major": 1, "minor": 0, "status": "figé", "section": "§1.6" },
+    { "id": "C6", "title": "Cycle de vie noyau et extensions", "major": 1, "minor": 0, "status": "figé", "section": "§1.7" },
+    { "id": "C7", "title": "Télémétrie, preuve de qualité et sécurité", "major": 1, "minor": 0, "status": "figé", "section": "§1.8" },
+    { "id": "C8", "title": "Livraison, signature et remise en état", "major": 1, "minor": 0, "status": "figé", "section": "§1.9" }
+  ],
+  "guids": [
+    { "id": "ClsidSfxApo", "value": "C243A8CB-D535-4BA0-BCC5-CC4338833E7A", "contract": "C2", "assignedBy": "E0-02", "assignedOn": "2026-10-28", "doc": "CLSID de l'APO SFX Xonar (routage par flux 2→6 / 6→6)." },
+    { "id": "ClsidEfxApo", "value": "D2FBC737-00C3-4482-B3DD-02D92C06003E", "contract": "C2", "assignedBy": "E0-02", "assignedOn": "2026-10-28", "doc": "CLSID de l'APO EFX Xonar (compensation de sortie 6→6)." },
+    { "id": "CapxPropertySet", "value": "702495C8-F022-44F6-B60D-EB0EEF3BF292", "contract": "C3", "assignedBy": "E0-02", "assignedOn": "2026-10-28", "doc": "FMTID des clés de propriété CAPX Xonar. Le rattachement à l'API Windows exacte reste à prouver par E0-04." },
+    { "id": "CapxContextSfx", "value": "6B08DC46-F8CB-4A18-892E-E24C7EDF36FE", "contract": "C3", "assignedBy": "E0-02", "assignedOn": "2026-10-28", "doc": "Identifiant du contexte de réglages CAPX associé aux instances SFX." },
+    { "id": "CapxContextEfx", "value": "82BE73B9-8A9B-41BA-86A9-8EB54AE3E292", "contract": "C3", "assignedBy": "E0-02", "assignedOn": "2026-10-28", "doc": "Identifiant du contexte de réglages CAPX associé aux instances EFX." }
+  ],
+  "propertyKeys": [
+    { "id": "PkeySfxProfileDocument", "fmtid": "CapxPropertySet", "pid": 1, "contract": "C3", "doc": "Document CAPX complet (CapxDocument) lu par les instances SFX." },
+    { "id": "PkeyEfxProfileDocument", "fmtid": "CapxPropertySet", "pid": 2, "contract": "C3", "doc": "Document CAPX complet (CapxDocument) lu par les instances EFX." }
+  ],
+  "constants": [
+    { "id": "MaxChannels", "type": "u32", "value": 8, "cppMirror": "::xonar::dsp::kMaxChannels", "contract": "C1", "doc": "Nombre de cases des tableaux par canal (ordre de l'enum Channel)." },
+    { "id": "EqBandsPerChannel", "type": "u32", "value": 10, "cppMirror": "::xonar::dsp::kEqBandsPerChannel", "contract": "C1", "doc": "Bandes EQ par canal." },
+    { "id": "PhysicalOutputMask", "type": "u32", "value": 1551, "contract": "C1", "doc": "Masque physique de sortie 0x60F (FL FR FC LFE SL SR)." },
+    { "id": "PhysicalOutputChannels", "type": "u32", "value": 6, "contract": "C1", "doc": "Nombre de positions de tampon de sortie physique." },
+    { "id": "PhysicalOutputOrder", "type": { "array": "enum:Channel" }, "value": ["FL", "FR", "FC", "LFE", "SL", "SR"], "contract": "C1", "doc": "Ordre des six positions de tampon de sortie physique." },
+    { "id": "PhysicalOutputChannelBits", "type": { "array": "u32" }, "value": [1, 2, 4, 8, 512, 1024], "contract": "C4", "doc": "Bits de canal admis pour un test de canal : un seul bit du masque 0x60F." },
+    { "id": "DefaultGainRampMs", "type": "u32", "value": 20, "contract": "C1", "doc": "Rampe de gain par défaut." },
+    { "id": "MaxDelayMs", "type": "f64", "value": 50, "contract": "C1", "doc": "Capacité maximale des lignes à retard." },
+    { "id": "CrossfadeMs", "type": "u32", "value": 20, "contract": "C1", "doc": "Durée du crossfade linéaire de TransitionBank (E1-04)." },
+    { "id": "BankSlotsPerInstance", "type": "u32", "value": 3, "contract": "C4", "doc": "Emplacements de banque maximum par instance APO." },
+    { "id": "MaskMono", "type": "u32", "value": 4, "cppMirror": "::xonar::dsp::masks::kMono", "contract": "C1", "doc": "KSAUDIO_SPEAKER_MONO (FC)." },
+    { "id": "MaskStereo", "type": "u32", "value": 3, "cppMirror": "::xonar::dsp::masks::kStereo", "contract": "C1", "doc": "FL FR." },
+    { "id": "MaskQuad", "type": "u32", "value": 51, "cppMirror": "::xonar::dsp::masks::kQuad", "contract": "C1", "doc": "FL FR BL BR (0x33)." },
+    { "id": "Mask51Back", "type": "u32", "value": 63, "cppMirror": "::xonar::dsp::masks::k5Point1Back", "contract": "C1", "doc": "KSAUDIO_SPEAKER_5POINT1 (0x3F)." },
+    { "id": "Mask51Side", "type": "u32", "value": 1551, "cppMirror": "::xonar::dsp::masks::k5Point1Side", "contract": "C1", "doc": "KSAUDIO_SPEAKER_5POINT1_SURROUND (0x60F)." },
+    { "id": "Mask71", "type": "u32", "value": 1599, "cppMirror": "::xonar::dsp::masks::k7Point1", "contract": "C1", "doc": "FL FR FC LFE BL BR SL SR (0x63F)." },
+    { "id": "KnownChannelBits", "type": "u32", "value": 1599, "contract": "C3", "doc": "Union des bits connus ; tout autre bit est refusé." },
+    { "id": "SupportedStreamMasks", "type": { "array": "u32" }, "value": [3, 63, 1551], "contract": "C2", "doc": "Layouts de flux pris en charge par le SFX : 2.0, 5.1 arrière, 5.1 latéral. Mono, quad et 7.1 : refus explicite." },
+    { "id": "XonarRenderSampleRates", "type": { "array": "u32" }, "value": [44100, 48000, 96000, 192000], "contract": "C3", "doc": "Fréquences candidates du rendu Xonar actuel ; 88 200 et 176 400 Hz jamais annoncées." },
+    { "id": "V0SampleRates", "type": { "array": "u32" }, "value": [44100, 48000, 88200, 96000, 176400, 192000], "contract": "C3", "doc": "Fréquences acceptées par le schéma v0 (import seulement)." },
+    { "id": "DspSampleRateMin", "type": "u32", "value": 8000, "contract": "C1", "doc": "[D] Borne basse de fréquence portable pour la validation DSP (distincte des capacités de l'endpoint)." },
+    { "id": "DspSampleRateMax", "type": "u32", "value": 384000, "contract": "C1", "doc": "[D] Borne haute de fréquence portable pour la validation DSP." },
+    { "id": "ProfileSchemaVersion", "type": "u32", "value": 1, "contract": "C3", "doc": "Version du document de profil." },
+    { "id": "StateSchemaVersion", "type": "u32", "value": 1, "contract": "C7", "doc": "Version du document d'état de l'agent." },
+    { "id": "CapxContractMajor", "type": "u16", "value": 1, "contract": "C3", "doc": "Version majeure de l'enveloppe CAPX." },
+    { "id": "CapxContractMinor", "type": "u16", "value": 0, "contract": "C3", "doc": "Version mineure de l'enveloppe CAPX." },
+    { "id": "ApiMajor", "type": "u16", "value": 1, "contract": "C4", "doc": "Version majeure de l'IPC centre ↔ agent." },
+    { "id": "ApiMinor", "type": "u16", "value": 0, "contract": "C4", "doc": "Version mineure de l'IPC centre ↔ agent." },
+    { "id": "MaxDocumentBytes", "type": "u32", "value": 131072, "contract": "C3", "doc": "Taille maximale d'un document JSON (128 Kio, octets UTF-8)." },
+    { "id": "MaxDocumentDepth", "type": "u32", "value": 16, "contract": "C3", "doc": "Profondeur maximale d'imbrication (racine = 1)." },
+    { "id": "NameMaxLength", "type": "u32", "value": 80, "contract": "C3", "doc": "Longueur maximale du nom d'un profil." },
+    { "id": "DescriptionMaxLength", "type": "u32", "value": 500, "contract": "C3", "doc": "Longueur maximale de la description d'un profil." },
+    { "id": "ProfileLibraryDirectory", "type": "string", "value": "%LOCALAPPDATA%\\XonarSE\\profiles\\", "contract": "C3", "doc": "Bibliothèque : <uuid>.json, remplacement atomique et dernière copie valide." },
+    { "id": "UiPreferencesFile", "type": "string", "value": "%LOCALAPPDATA%\\XonarSE\\ui.json", "contract": "C3", "doc": "Préférences d'interface ; pas une configuration audio effective." },
+    { "id": "KernelSettingHonorJackDetection", "type": "u32", "value": 0, "contract": "C3", "doc": "Valeur Settings\\HonorJackDetection du pilote." },
+    { "id": "KernelSettingDefaultSampleRate", "type": "u32", "value": 48000, "contract": "C3", "doc": "Valeur Settings\\DefaultSampleRate du pilote." },
+    { "id": "PipeNamePrefix", "type": "string", "value": "\\\\.\\pipe\\XonarSE.Control.v1.", "contract": "C4", "doc": "Préfixe du named pipe ; suffixé par l'identifiant de session. Le nom n'authentifie pas." },
+    { "id": "FrameHeaderBytes", "type": "u32", "value": 4, "contract": "C4", "doc": "En-tête de trame : longueur uint32 little-endian." },
+    { "id": "MaxFrameBytes", "type": "u32", "value": 131072, "contract": "C4", "doc": "Plafond d'une trame JSON UTF-8." },
+    { "id": "CommandTimeoutMs", "type": "u32", "value": 2000, "contract": "C4", "doc": "Délai d'une commande." },
+    { "id": "ReplayCacheEntries", "type": "u32", "value": 256, "contract": "C4", "doc": "Réponses mémorisées par connexion pour les requestId répétés." },
+    { "id": "ChannelTestMaxExpiryMs", "type": "u32", "value": 2000, "contract": "C4", "doc": "Expiration maximale d'une commande de test après renouvellement." },
+    { "id": "ChannelTestMaxLevelDb", "type": "f64", "value": -20, "contract": "C7", "doc": "Plafond de niveau d'un test de canal (règle S4)." },
+    { "id": "UsbVendorId", "type": "u16", "value": 2821, "contract": "C4", "doc": "VID 0x0B05." },
+    { "id": "UsbProductId", "type": "u16", "value": 6301, "contract": "C4", "doc": "PID 0x189D." },
+    { "id": "UsbAudioInterface", "type": "u8", "value": 0, "contract": "C4", "doc": "Interface audio MI_00." },
+    { "id": "DeviceHardwareId", "type": "string", "value": "USB\\VID_0B05&PID_189D&MI_00", "contract": "C8", "doc": "HWID exact ciblé ; jamais d'identification par FriendlyName." },
+    { "id": "KsVolumeUnitsPerDb", "type": "i32", "value": 65536, "contract": "C5", "doc": "KSPROPERTY_AUDIO_VOLUMELEVEL : LONG en 1/65536 dB." },
+    { "id": "KsVolumeLevelMinDb", "type": "f64", "value": -32768, "contract": "C5", "doc": "Borne de représentation LONG 16.16 (pas la plage matérielle, à interroger par BASICSUPPORT)." },
+    { "id": "KsVolumeLevelMaxDbExclusive", "type": "f64", "value": 32768, "contract": "C5", "doc": "Borne haute exclusive de représentation LONG 16.16." },
+    { "id": "SpeakerKsChannels", "type": "u32", "value": 6, "contract": "C5", "doc": "Canaux KS 0…5 du nœud volume haut-parleurs → FU12 canaux UAC2 1…6." },
+    { "id": "HeadphoneKsChannels", "type": "u32", "value": 2, "contract": "C5", "doc": "Canaux KS 0…1 du casque → FU13 canaux 1…2." },
+    { "id": "SpeakerFeatureUnit", "type": "u8", "value": 12, "contract": "C5", "doc": "Feature Unit UAC2 des haut-parleurs." },
+    { "id": "HeadphoneFeatureUnit", "type": "u8", "value": 13, "contract": "C5", "doc": "Feature Unit UAC2 du casque." },
+    { "id": "MuteFeatureUnits", "type": { "array": "u8" }, "value": [12, 13, 14], "contract": "C5", "doc": "Feature Units portant le mute maître (canal UAC2 0)." },
+    { "id": "MuteMasterUacChannel", "type": "u8", "value": 0, "contract": "C5", "doc": "Canal UAC2 du mute maître ; pas de faux mute par enceinte." },
+    { "id": "SpeakerJacks", "type": "u32", "value": 3, "contract": "C5", "doc": "Jacks haut-parleurs décrits sur la broche Topology 1." },
+    { "id": "HeadphoneJacks", "type": "u32", "value": 1, "contract": "C5", "doc": "Jack casque." },
+    { "id": "OpticalJacks", "type": "u32", "value": 1, "contract": "C5", "doc": "Sortie optique." },
+    { "id": "ExistingRenderEndpoints", "type": "u32", "value": 3, "contract": "C6", "doc": "Endpoints de rendu existants dans common.h ; jamais renumérotés." },
+    { "id": "UiRefreshMaxHz", "type": "u32", "value": 20, "contract": "C7", "doc": "Rafraîchissement maximal de l'interface." },
+    { "id": "TelemetryStaleMs", "type": "u32", "value": 2000, "contract": "C7", "doc": "Au-delà, la mesure est « périmée »." },
+    { "id": "MeterFloorDbfs", "type": "f64", "value": -200, "contract": "C7", "doc": "[D] Plancher de crête représentant le silence numérique (JSON n'a pas -Inf)." },
+    { "id": "MaxApoInstances", "type": "u32", "value": 64, "contract": "C7", "doc": "[D] Nombre maximal d'instances APO rapportées par endpoint." },
+    { "id": "MaxDiagnostics", "type": "u32", "value": 256, "contract": "C4", "doc": "[D] Nombre maximal de diagnostics renvoyés par ValidateProfile." },
+    { "id": "MaxEndpoints", "type": "u32", "value": 16, "contract": "C4", "doc": "[D] Nombre maximal d'endpoints listés par GetCapabilities." },
+    { "id": "IdentityMaxError", "type": "f64", "value": 2e-6, "contract": "C7", "doc": "Identité DSP sans traitement : max |erreur|." },
+    { "id": "MutedChannelMaxAbs", "type": "f64", "value": 1e-7, "contract": "C7", "doc": "Canaux censés muets : max |x|." },
+    { "id": "LimiterCeilingTolerance", "type": "f64", "value": 2e-6, "contract": "C7", "doc": "Tolérance au-dessus de 10^(ceilingDb/20)." },
+    { "id": "CrossfadeMaxError", "type": "f64", "value": 2e-6, "contract": "C7", "doc": "Écart à la référence analytique de crossfade." },
+    { "id": "SpliceMaxDiscontinuity", "type": "f64", "value": 1e-4, "contract": "C7", "doc": "Discontinuité ajoutée au raccord (pleine échelle)." },
+    { "id": "RampToleranceFrames", "type": "u32", "value": 1, "contract": "C7", "doc": "Tolérance de durée de rampe : 20 ms ± 1 trame." },
+    { "id": "ApoP99BudgetPercent", "type": "f64", "value": 25, "contract": "C7", "doc": "Coût p99 d'APOProcess en pourcentage de la période." },
+    { "id": "ApoMaxBudgetPercent", "type": "f64", "value": 100, "contract": "C7", "doc": "Coût maximal d'APOProcess en pourcentage de la période." },
+    { "id": "PerfRunMinutes", "type": "u32", "value": 30, "contract": "C7", "doc": "Durée de mesure de performance." },
+    { "id": "InstrumentedCallbacks", "type": "u32", "value": 1000000, "contract": "C7", "doc": "Callbacks instrumentés sans allocation, attente ni E/S." },
+    { "id": "UuidPattern", "type": "string", "value": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$", "contract": "C3", "doc": "UUID canonique en minuscules." },
+    { "id": "EndpointKeyPattern", "type": "string", "value": "^[!-~]{1,256}$", "contract": "C4", "doc": "Clé d'endpoint opaque : ASCII imprimable sans espace." },
+    { "id": "InstanceIdPattern", "type": "string", "value": "^[A-Za-z0-9._:{}-]{1,128}$", "contract": "C7", "doc": "Identifiant opaque d'instance APO." },
+    { "id": "DriverVersionPattern", "type": "string", "value": "^[0-9]{1,5}\\.[0-9]{1,5}\\.[0-9]{1,5}\\.[0-9]{1,5}$", "contract": "C7", "doc": "Version de pilote à quatre composantes." },
+    { "id": "Sha256Pattern", "type": "string", "value": "^[0-9a-f]{64}$", "contract": "C7", "doc": "Empreinte SHA-256 en hexadécimal minuscule." },
+    { "id": "DiagnosticCodePattern", "type": "string", "value": "^[a-z][A-Za-z0-9]*(\\.[A-Za-z0-9]+)*$", "contract": "C4", "doc": "Code de diagnostic stable (ex. schema.maximum, semantic.nyquist)." },
+    { "id": "ContractIdPattern", "type": "string", "value": "^C[1-8]$", "contract": "C8", "doc": "Identifiant de contrat." }
+  ],
+  "enums": [
+    { "id": "Channel", "contract": "C1", "doc": "Canaux logiques ; ordre des tableaux par canal (huit cases), pas des positions de tampon.",
+      "cppMirror": { "type": "::xonar::dsp::Channel", "count": "::xonar::dsp::Channel::Count", "attrs": { "maskBit": "::xonar::dsp::speakerMaskBit" } },
+      "attrs": { "maskBit": "u32" },
+      "values": [
+        { "id": "FrontLeft", "wire": "FL", "attrs": { "maskBit": 1 } },
+        { "id": "FrontRight", "wire": "FR", "attrs": { "maskBit": 2 } },
+        { "id": "FrontCenter", "wire": "FC", "attrs": { "maskBit": 4 } },
+        { "id": "LowFrequency", "wire": "LFE", "attrs": { "maskBit": 8 } },
+        { "id": "BackLeft", "wire": "BL", "attrs": { "maskBit": 16 } },
+        { "id": "BackRight", "wire": "BR", "attrs": { "maskBit": 32 } },
+        { "id": "SideLeft", "wire": "SL", "attrs": { "maskBit": 512 } },
+        { "id": "SideRight", "wire": "SR", "attrs": { "maskBit": 1024 } }
+      ] },
+    { "id": "DspMode", "contract": "C1", "doc": "Miroir de xonar::dsp::Mode. ChannelTest n'est jamais persistant.",
+      "cppMirror": { "type": "::xonar::dsp::Mode" },
+      "values": [
+        { "id": "PassThrough", "wire": "PassThrough" },
+        { "id": "Upmix2to6", "wire": "Upmix2to6" },
+        { "id": "Downmix6to2", "wire": "Downmix6to2" },
+        { "id": "TwoPointOne", "wire": "TwoPointOne" },
+        { "id": "ChannelTest", "wire": "ChannelTest" }
+      ] },
+    { "id": "PublishResult", "contract": "C1", "doc": "Résultat de TransitionBank::stage (E1-04).",
+      "values": [ { "id": "Accepted", "wire": "Accepted" }, { "id": "Busy", "wire": "Busy" }, { "id": "Invalid", "wire": "Invalid" } ] },
+    { "id": "ProcessingStage", "contract": "C1", "doc": "Processeur préparé par TransitionBank, figé pour sa durée de vie.",
+      "values": [ { "id": "RoutingOnly", "wire": "RoutingOnly" }, { "id": "Output", "wire": "Output" } ] },
+    { "id": "ApoStage", "contract": "C2", "doc": "Étage APO : SFX par flux avant mixage, EFX après mixage.",
+      "values": [ { "id": "Sfx", "wire": "SFX" }, { "id": "Efx", "wire": "EFX" } ] },
+    { "id": "EndpointRole", "contract": "C3", "doc": "Rôle d'endpoint ; v1 : haut-parleurs seulement.",
+      "values": [ { "id": "Speakers", "wire": "speakers" } ] },
+    { "id": "ListeningMode", "contract": "C3", "doc": "Mode de sortie persistant. Sortie Windows toujours 6 canaux / 0x60F.",
+      "attrs": { "efxDspMode": "enum:DspMode", "neutralRouting": "bool" },
+      "values": [
+        { "id": "Surround51", "wire": "5.1", "attrs": { "efxDspMode": "PassThrough", "neutralRouting": false }, "doc": "Identité puis calibration ; aucune dérivation LFE par défaut." },
+        { "id": "Upmix", "wire": "upmix", "attrs": { "efxDspMode": "PassThrough", "neutralRouting": false }, "doc": "Upmix seulement pour entrée 2.0 déclarée ; 5.1 préservé." },
+        { "id": "TwoPointOne", "wire": "2.1", "attrs": { "efxDspMode": "TwoPointOne", "neutralRouting": true }, "doc": "TwoPointOne depuis le mix 5.1 ; politique résolue neutre avant mixage." },
+        { "id": "Stereo20", "wire": "2.0", "attrs": { "efxDspMode": "Downmix6to2", "neutralRouting": true }, "doc": "Downmix6to2 puis FL/FR + quatre zéros ; politique résolue neutre avant mixage." }
+      ] },
+    { "id": "SourcePolicy", "contract": "C3", "doc": "Politique par flux négocié demandée par le profil.",
+      "values": [
+        { "id": "Preserve", "wire": "preserve" },
+        { "id": "AutoDeclaredLayout", "wire": "autoDeclaredLayout", "doc": "Upmix des entrées 2.0 déclarées, préservation des entrées 5.1 ; jamais fondé sur le silence." },
+        { "id": "ForceStereoFrontPair", "wire": "forceStereoFrontPair", "doc": "Intervention explicite qui abandonne les autres canaux du flux ; jamais activée par silence." }
+      ] },
+    { "id": "ResolvedPolicy", "contract": "C7", "doc": "Politique effectivement résolue, rapportée par l'agent.",
+      "values": [
+        { "id": "Preserve", "wire": "preserve" },
+        { "id": "AutoDeclaredLayout", "wire": "autoDeclaredLayout" },
+        { "id": "ForceStereoFrontPair", "wire": "forceStereoFrontPair" },
+        { "id": "Neutral", "wire": "neutral", "doc": "Transport neutre avant mixage (modes 2.0 et 2.1)." },
+        { "id": "Conservative", "wire": "conservative", "doc": "Transport conservateur avant toute lecture valide." }
+      ] },
+    { "id": "CommandAccess", "contract": "C4", "doc": "Nature d'une commande : une écriture exige expectedRevision.",
+      "values": [ { "id": "Read", "wire": "read" }, { "id": "Write", "wire": "write" }, { "id": "Ephemeral", "wire": "ephemeral" } ] },
+    { "id": "CommandScope", "contract": "C4", "doc": "Portée d'une commande : agent entier ou endpoint identifié.",
+      "values": [ { "id": "Agent", "wire": "agent" }, { "id": "Endpoint", "wire": "endpoint" } ] },
+    { "id": "Command", "contract": "C4", "doc": "Commandes IPC centre ↔ agent.",
+      "attrs": { "access": "enum:CommandAccess", "scope": "enum:CommandScope" },
+      "values": [
+        { "id": "GetCapabilities", "wire": "GetCapabilities", "attrs": { "access": "read", "scope": "agent" } },
+        { "id": "GetState", "wire": "GetState", "attrs": { "access": "read", "scope": "endpoint" } },
+        { "id": "ValidateProfile", "wire": "ValidateProfile", "attrs": { "access": "read", "scope": "endpoint" } },
+        { "id": "ApplyProfile", "wire": "ApplyProfile", "attrs": { "access": "write", "scope": "endpoint" } },
+        { "id": "SubscribeState", "wire": "SubscribeState", "attrs": { "access": "read", "scope": "endpoint" } },
+        { "id": "SetHardwareVolume", "wire": "SetHardwareVolume", "attrs": { "access": "write", "scope": "endpoint" } },
+        { "id": "StartChannelTest", "wire": "StartChannelTest", "attrs": { "access": "ephemeral", "scope": "endpoint" } },
+        { "id": "StopChannelTest", "wire": "StopChannelTest", "attrs": { "access": "ephemeral", "scope": "endpoint" } },
+        { "id": "RequestFormatRepair", "wire": "RequestFormatRepair", "attrs": { "access": "write", "scope": "endpoint" } }
+      ] },
+    { "id": "ResponseStatus", "contract": "C4", "doc": "[D] Statut de réponse : validé/lu, écrit dans CAPX, appliqué par toutes les instances, ou erreur.",
+      "values": [
+        { "id": "Ok", "wire": "Ok", "doc": "Lecture ou validation réussie, sans écriture." },
+        { "id": "Committed", "wire": "Committed", "doc": "Document écrit ; application pas encore confirmée par toutes les instances." },
+        { "id": "Applied", "wire": "Applied", "doc": "Toutes les instances rapportées ont appliqué committedGeneration." },
+        { "id": "Error", "wire": "Error" }
+      ] },
+    { "id": "ErrorCode", "contract": "C4", "doc": "Erreurs stables de l'IPC.",
+      "values": [
+        { "id": "InvalidProfile", "wire": "InvalidProfile" },
+        { "id": "RevisionConflict", "wire": "RevisionConflict" },
+        { "id": "UnsupportedCapability", "wire": "UnsupportedCapability" },
+        { "id": "EndpointUnavailable", "wire": "EndpointUnavailable" },
+        { "id": "Busy", "wire": "Busy" },
+        { "id": "AccessDenied", "wire": "AccessDenied" },
+        { "id": "RestartRequired", "wire": "RestartRequired" },
+        { "id": "TimedOut", "wire": "TimedOut" }
+      ] },
+    { "id": "HardwareControl", "contract": "C5", "doc": "Discriminant de SetHardwareVolume.",
+      "values": [ { "id": "Volume", "wire": "volume" }, { "id": "Mute", "wire": "mute" } ] },
+    { "id": "ResultKind", "contract": "C4", "doc": "Discriminant du champ result d'une réponse.",
+      "values": [
+        { "id": "Capabilities", "wire": "capabilities" },
+        { "id": "State", "wire": "state" },
+        { "id": "Validation", "wire": "validation" },
+        { "id": "HardwareVolume", "wire": "hardwareVolume" },
+        { "id": "ChannelTest", "wire": "channelTest" }
+      ] },
+    { "id": "DriverKind", "contract": "C7", "doc": "Pilote noyau observé pour l'endpoint.",
+      "values": [ { "id": "Xonarse", "wire": "xonarse" }, { "id": "Usbaudio2", "wire": "usbaudio2" }, { "id": "Unknown", "wire": "unknown" } ] },
+    { "id": "SampleFormat", "contract": "C7", "doc": "[D] Format d'échantillon de la connexion négociée.",
+      "values": [ { "id": "Float32", "wire": "float32" }, { "id": "Pcm16", "wire": "pcm16" }, { "id": "Pcm24", "wire": "pcm24" }, { "id": "Pcm32", "wire": "pcm32" }, { "id": "Unknown", "wire": "unknown" } ] },
+    { "id": "BypassKind", "contract": "C7", "doc": "Motif de bypass : observé ou inconnu, jamais supposé.",
+      "values": [ { "id": "None", "wire": "none" }, { "id": "Observed", "wire": "observed" }, { "id": "Unknown", "wire": "unknown" } ] },
+    { "id": "BypassReason", "contract": "C2", "doc": "[D] Motifs de bypass mesurés de la matrice C2.",
+      "values": [
+        { "id": "ExclusiveMode", "wire": "exclusiveMode" },
+        { "id": "Raw", "wire": "raw" },
+        { "id": "EnhancementsDisabled", "wire": "enhancementsDisabled" },
+        { "id": "Offload", "wire": "offload" },
+        { "id": "Drm", "wire": "drm" },
+        { "id": "Iec61937", "wire": "iec61937" },
+        { "id": "FormatUnsupported", "wire": "formatUnsupported" },
+        { "id": "Other", "wire": "other" }
+      ] },
+    { "id": "JackReliability", "contract": "C5", "doc": "Fiabilité de l'état jack publié : sous HonorJackDetection=0, connecté ne prouve pas la présence physique.",
+      "values": [ { "id": "Reported", "wire": "reported" }, { "id": "ForcedConnection", "wire": "forcedConnection" }, { "id": "Unknown", "wire": "unknown" } ] },
+    { "id": "KernelLifecycleState", "contract": "C6", "emit": false, "doc": "Référence seulement : la déclaration noyau appartient à E3-01 (contracts-kernel/v1.md).",
+      "values": [ { "id": "Stopped", "wire": "Stopped" }, { "id": "Configured", "wire": "Configured" }, { "id": "Running", "wire": "Running" }, { "id": "Quiescing", "wire": "Quiescing" }, { "id": "Suspended", "wire": "Suspended" }, { "id": "Removed", "wire": "Removed" } ] }
+  ],
+  "types": [
+    { "id": "EqBand", "contract": "C3", "doc": "Bande EQ peaking.",
+      "fields": [
+        { "name": "enabled", "type": "bool", "required": false, "default": false, "dsp": "enabled" },
+        { "name": "frequencyHz", "type": "f64", "min": 10, "max": 20000, "nyquist": true, "required": false, "default": 1000, "dsp": "frequencyHz", "doc": "10…20 000 Hz et strictement sous Nyquist de la connexion." },
+        { "name": "q", "type": "f64", "exclusiveMin": 0, "max": 20, "required": false, "default": 1, "dsp": "q" },
+        { "name": "gainDb", "type": "f64", "min": -24, "max": 12, "required": false, "default": 0, "dsp": "gainDb" }
+      ] },
+    { "id": "UpmixSettings", "contract": "C3", "doc": "Upmix 2→6 du SFX.",
+      "fields": [
+        { "name": "centerGainDb", "type": "f64", "min": -30, "max": 0, "required": false, "default": -3, "dsp": "upmix.centerGainDb" },
+        { "name": "surroundGainDb", "type": "f64", "min": -30, "max": 0, "required": false, "default": -6, "dsp": "upmix.surroundGainDb" },
+        { "name": "deriveLfe", "type": "bool", "required": false, "default": true, "dsp": "upmix.deriveLfe" },
+        { "name": "lfeGainDb", "type": "f64", "min": -30, "max": 0, "required": false, "default": -6, "dsp": "upmix.lfeGainDb" },
+        { "name": "lfeLowPassHz", "type": "f64", "min": 40, "max": 250, "nyquist": true, "required": false, "default": 120, "dsp": "upmix.lfeLowPassHz", "doc": "Dérivation upmix 40…250 Hz." }
+      ] },
+    { "id": "DownmixSettings", "contract": "C3", "doc": "Downmix 5.1 → 2.0 (ITU-R BS.775).",
+      "fields": [
+        { "name": "centerGainDb", "type": "f64", "min": -30, "max": 0, "required": false, "default": -3, "dsp": "downmix.centerGainDb" },
+        { "name": "surroundGainDb", "type": "f64", "min": -30, "max": 0, "required": false, "default": -3, "dsp": "downmix.surroundGainDb" },
+        { "name": "includeLfe", "type": "bool", "required": false, "default": false, "dsp": "downmix.includeLfe" },
+        { "name": "lfeGainDb", "type": "f64", "min": -30, "max": 0, "required": false, "default": -6, "dsp": "downmix.lfeGainDb" },
+        { "name": "headroomDb", "type": "f64", "min": -12, "max": 0, "required": false, "default": -4.5, "dsp": "downmix.headroomDb" }
+      ] },
+    { "id": "TwoPointOneSettings", "contract": "C3", "doc": "2.1 virtuel sur la sortie 5.1.",
+      "fields": [
+        { "name": "lfeGainDb", "type": "f64", "min": -30, "max": 6, "required": false, "default": 0, "dsp": "twoPointOne.lfeGainDb" },
+        { "name": "lfeLowPassHz", "type": "f64", "min": 40, "max": 200, "nyquist": true, "required": false, "default": 80, "dsp": "twoPointOne.lfeLowPassHz" },
+        { "name": "includeSourceLfe", "type": "bool", "required": false, "default": true, "dsp": "twoPointOne.includeSourceLfe" },
+        { "name": "sourceLfeGainDb", "type": "f64", "min": -30, "max": 6, "required": false, "default": 0, "dsp": "twoPointOne.sourceLfeGainDb" }
+      ] },
+    { "id": "BassManagementSettings", "contract": "C3", "doc": "Bass management de l'EFX.",
+      "fields": [
+        { "name": "enabled", "type": "bool", "required": false, "default": false, "dsp": "bassManagement.enabled" },
+        { "name": "crossoverHz", "type": "f64", "min": 40, "max": 200, "nyquist": true, "required": false, "default": 80, "dsp": "bassManagement.crossoverHz" },
+        { "name": "highPassSatellites", "type": "bool", "required": false, "default": true, "dsp": "bassManagement.highPassSatellites" },
+        { "name": "sumToLfe", "type": "bool", "required": false, "default": true, "dsp": "bassManagement.sumToLfe" },
+        { "name": "sumToLfeGainDb", "type": "f64", "min": -20, "max": 6, "required": false, "default": 0, "dsp": "bassManagement.sumToLfeGainDb" }
+      ] },
+    { "id": "LimiterSettings", "contract": "C3", "doc": "Limiteur crête de l'EFX.",
+      "fields": [
+        { "name": "enabled", "type": "bool", "required": false, "default": true, "dsp": "limiter.enabled" },
+        { "name": "ceilingDb", "type": "f64", "min": -12, "max": 0, "required": false, "default": -0.3, "dsp": "limiter.ceilingDb" },
+        { "name": "releaseMs", "type": "f64", "min": 5, "max": 1000, "required": false, "default": 80, "dsp": "limiter.releaseMs" }
+      ] },
+    { "id": "RoutingSettings", "contract": "C2", "doc": "Paramètres du RoutingStage SFX (matrice + dérivation LFE).",
+      "fields": [
+        { "name": "upmix", "type": "type:UpmixSettings", "required": false, "default": {} }
+      ] },
+    { "id": "OutputSettings", "contract": "C3", "doc": "Compensation de sortie EFX ; groupes absents normalisés aux défauts C++.",
+      "fields": [
+        { "name": "masterGainDb", "type": "f64", "min": -60, "max": 6, "required": false, "default": 0, "dsp": "masterGainDb" },
+        { "name": "channelGainDb", "type": { "array": { "type": "f64", "min": -60, "max": 12 }, "lengthFrom": "MaxChannels" }, "required": false, "default": [0, 0, 0, 0, 0, 0, 0, 0], "dsp": "channelGainDb", "doc": "Trims indexés par Channel (FL FR FC LFE BL BR SL SR)." },
+        { "name": "channelDelayMs", "type": { "array": { "type": "f64", "min": 0, "maxFrom": "MaxDelayMs" }, "lengthFrom": "MaxChannels" }, "required": false, "default": [0, 0, 0, 0, 0, 0, 0, 0], "dsp": "channelDelayMs", "doc": "Délais 0…50 ms, chacun ≤ maxDelayMs." },
+        { "name": "channelMute", "type": { "array": "bool", "lengthFrom": "MaxChannels" }, "required": false, "default": [false, false, false, false, false, false, false, false], "dsp": "channelMute" },
+        { "name": "eq", "type": { "array": { "array": "type:EqBand", "lengthFrom": "EqBandsPerChannel" }, "lengthFrom": "MaxChannels" }, "required": false, "default": "$itemDefaults", "dsp": "eq", "doc": "eq[8][10] indexé par Channel." },
+        { "name": "downmix", "type": "type:DownmixSettings", "required": false, "default": {} },
+        { "name": "twoPointOne", "type": "type:TwoPointOneSettings", "required": false, "default": {} },
+        { "name": "bassManagement", "type": "type:BassManagementSettings", "required": false, "default": {} },
+        { "name": "limiter", "type": "type:LimiterSettings", "required": false, "default": {} },
+        { "name": "gainRampMs", "type": "u32", "min": 1, "max": 500, "required": false, "defaultFrom": "DefaultGainRampMs", "dsp": "gainRampMs" },
+        { "name": "maxDelayMs", "type": "f64", "min": 0, "maxFrom": "MaxDelayMs", "required": false, "defaultFrom": "MaxDelayMs", "dsp": "maxDelayMs" }
+      ] },
+    { "id": "ProfileDocument", "contract": "C3", "doc": "Document de profil v1 : bibliothèque, import/export et charge utile CAPX. Pas de sampleRate, de masque, de ChannelTest, de chemin ni de commande noyau.",
+      "versionField": { "name": "schemaVersion", "supported": 1 },
+      "fields": [
+        { "name": "schemaVersion", "type": "u32", "const": 1 },
+        { "name": "profileId", "type": "string", "patternFrom": "UuidPattern" },
+        { "name": "revision", "type": "u64", "min": 1, "doc": "Révision du document, croissante, ≥ 1." },
+        { "name": "name", "type": "string", "minLength": 1, "maxLengthFrom": "NameMaxLength", "required": false },
+        { "name": "description", "type": "string", "maxLengthFrom": "DescriptionMaxLength", "required": false },
+        { "name": "endpointRole", "type": "enum:EndpointRole" },
+        { "name": "listeningMode", "type": "enum:ListeningMode" },
+        { "name": "sourcePolicy", "type": "enum:SourcePolicy" },
+        { "name": "routing", "type": "type:RoutingSettings" },
+        { "name": "output", "type": "type:OutputSettings" }
+      ] },
+    { "id": "CapxDocument", "contract": "C3", "doc": "Document complet autonome publié dans chaque magasin CAPX ; payload normalisé.",
+      "versionField": { "name": "contractMajor", "supported": 1 },
+      "fields": [
+        { "name": "contractMajor", "type": "u16", "const": 1 },
+        { "name": "contractMinor", "type": "u16" },
+        { "name": "epoch", "type": "u64" },
+        { "name": "generation", "type": "u64", "min": 1 },
+        { "name": "payload", "type": "type:ProfileDocument" }
+      ] },
+    { "id": "EmptyPayload", "contract": "C4", "doc": "Charge utile vide.", "fields": [] },
+    { "id": "ProfilePayload", "contract": "C4", "doc": "Charge utile d'ApplyProfile : profil v1 valide exigé dès l'enveloppe.",
+      "fields": [ { "name": "profile", "type": "type:ProfileDocument" } ] },
+    { "id": "UncheckedProfilePayload", "contract": "C4", "doc": "[D] Charge utile de ValidateProfile : objet JSON quelconque, validé par l'agent qui renvoie tous les diagnostics dans ValidationResult.",
+      "fields": [ { "name": "profile", "type": "json", "doc": "Document JSON brut (objet), non validé par l'enveloppe." } ] },
+    { "id": "SubscribeStatePayload", "contract": "C7", "doc": "Abonnement à l'état, rafraîchissement ≤ 20 Hz.",
+      "fields": [ { "name": "maxRateHz", "type": "u32", "min": 1, "maxFrom": "UiRefreshMaxHz", "required": false, "defaultFrom": "UiRefreshMaxHz" } ] },
+    { "id": "VolumeLevelControl", "contract": "C5", "doc": "Volume matériel d'un canal KS haut-parleurs ; bornes réelles par BASICSUPPORT.",
+      "fields": [
+        { "name": "control", "type": "enum:HardwareControl", "const": "volume" },
+        { "name": "ksChannel", "type": "u32", "min": 0, "max": 5 },
+        { "name": "levelDb", "type": "f64", "minFrom": "KsVolumeLevelMinDb", "exclusiveMaxFrom": "KsVolumeLevelMaxDbExclusive" }
+      ] },
+    { "id": "MuteControl", "contract": "C5", "doc": "Mute maître matériel (canal UAC2 0).",
+      "fields": [
+        { "name": "control", "type": "enum:HardwareControl", "const": "mute" },
+        { "name": "mute", "type": "bool" }
+      ] },
+    { "id": "StartChannelTestPayload", "contract": "C4", "doc": "Démarrage ou renouvellement d'un test de canal éphémère.",
+      "fields": [
+        { "name": "testId", "type": "string", "patternFrom": "UuidPattern" },
+        { "name": "channelBit", "type": "u32", "allowedFrom": "PhysicalOutputChannelBits" },
+        { "name": "frequencyHz", "type": "f64", "min": 20, "max": 20000, "nyquist": true },
+        { "name": "levelDb", "type": "f64", "min": -60, "maxFrom": "ChannelTestMaxLevelDb" }
+      ] },
+    { "id": "StopChannelTestPayload", "contract": "C4", "doc": "Arrêt explicite d'un test de canal.",
+      "fields": [ { "name": "testId", "type": "string", "patternFrom": "UuidPattern" } ] },
+    { "id": "ControlRequest", "contract": "C4", "doc": "Requête IPC centre → agent.",
+      "versionField": { "name": "apiMajor", "supported": 1 },
+      "fields": [
+        { "name": "apiMajor", "type": "u16", "const": 1 },
+        { "name": "apiMinor", "type": "u16" },
+        { "name": "requestId", "type": "string", "patternFrom": "UuidPattern" },
+        { "name": "endpointKey", "type": "string", "patternFrom": "EndpointKeyPattern", "nullable": true,
+          "when": [ { "field": "command", "attr": "scope", "in": ["endpoint"], "then": "nonNull" } ],
+          "doc": "Clé opaque ; null admis seulement pour une commande de portée agent." },
+        { "name": "expectedRevision", "type": "u64", "required": false,
+          "when": [ { "field": "command", "attr": "access", "in": ["write"], "then": "required" } ],
+          "doc": "Dernière révision connue ; obligatoire pour toute écriture." },
+        { "name": "command", "type": "enum:Command" },
+        { "name": "payload", "type": { "switch": "command", "base": "ControlRequestPayload", "cases": {
+            "GetCapabilities": "type:EmptyPayload",
+            "GetState": "type:EmptyPayload",
+            "ValidateProfile": "type:UncheckedProfilePayload",
+            "ApplyProfile": "type:ProfilePayload",
+            "SubscribeState": "type:SubscribeStatePayload",
+            "SetHardwareVolume": "union:HardwareVolumePayload",
+            "StartChannelTest": "type:StartChannelTestPayload",
+            "StopChannelTest": "type:StopChannelTestPayload",
+            "RequestFormatRepair": "type:EmptyPayload" } } }
+      ] },
+    { "id": "InstanceGeneration", "contract": "C3", "doc": "Génération appliquée par une instance APO.",
+      "fields": [
+        { "name": "instanceId", "type": "string", "patternFrom": "InstanceIdPattern" },
+        { "name": "stage", "type": "enum:ApoStage" },
+        { "name": "appliedGeneration", "type": "u64" }
+      ] },
+    { "id": "ErrorInfo", "contract": "C4", "doc": "Erreur stable.",
+      "fields": [
+        { "name": "code", "type": "enum:ErrorCode" },
+        { "name": "message", "type": "string", "maxLength": 500 },
+        { "name": "path", "type": "string", "maxLength": 256, "nullable": true, "doc": "Pointeur JSON du champ fautif, si applicable." }
+      ] },
+    { "id": "ContractVersionInfo", "contract": "C8", "doc": "Version d'un contrat.",
+      "fields": [
+        { "name": "id", "type": "string", "patternFrom": "ContractIdPattern" },
+        { "name": "major", "type": "u16" },
+        { "name": "minor", "type": "u16" }
+      ] },
+    { "id": "DriverInfo", "contract": "C7", "doc": "Pilote observé ; version et empreinte nulles si inconnues.",
+      "fields": [
+        { "name": "kind", "type": "enum:DriverKind" },
+        { "name": "version", "type": "string", "patternFrom": "DriverVersionPattern", "nullable": true },
+        { "name": "packageSha256", "type": "string", "patternFrom": "Sha256Pattern", "nullable": true }
+      ] },
+    { "id": "EndpointCapability", "contract": "C4", "doc": "Endpoint identifié par MI_00, VID/PID et rôle. writable=false sans correspondance unique.",
+      "fields": [
+        { "name": "endpointKey", "type": "string", "patternFrom": "EndpointKeyPattern" },
+        { "name": "endpointRole", "type": "enum:EndpointRole" },
+        { "name": "driver", "type": "type:DriverInfo" },
+        { "name": "supportedSampleRates", "type": { "array": { "type": "u32", "allowedFrom": "XonarRenderSampleRates" }, "maxItems": 4, "uniqueItems": true } },
+        { "name": "physicalChannelMask", "type": "u32", "constFrom": "PhysicalOutputMask" },
+        { "name": "writable", "type": "bool" }
+      ] },
+    { "id": "FeatureFlags", "contract": "C4", "doc": "Capacités activées après preuve (E0-03, E0-04).",
+      "fields": [
+        { "name": "autoDeclaredLayout", "type": "bool" },
+        { "name": "channelTest", "type": "bool" },
+        { "name": "formatRepair", "type": "bool" }
+      ] },
+    { "id": "CapabilitiesResult", "contract": "C4", "doc": "Résultat de GetCapabilities.",
+      "fields": [
+        { "name": "kind", "type": "enum:ResultKind", "const": "capabilities" },
+        { "name": "apiMajor", "type": "u16", "const": 1 },
+        { "name": "apiMinor", "type": "u16" },
+        { "name": "contracts", "type": { "array": "type:ContractVersionInfo", "minItems": 8, "maxItems": 8 } },
+        { "name": "endpoints", "type": { "array": "type:EndpointCapability", "maxItemsFrom": "MaxEndpoints" } },
+        { "name": "features", "type": "type:FeatureFlags" }
+      ] },
+    { "id": "Diagnostic", "contract": "C4", "doc": "Diagnostic de champ.",
+      "fields": [
+        { "name": "code", "type": "string", "patternFrom": "DiagnosticCodePattern", "maxLength": 64 },
+        { "name": "path", "type": "string", "maxLength": 256 },
+        { "name": "message", "type": "string", "maxLength": 500 }
+      ] },
+    { "id": "ValidationResult", "contract": "C4", "doc": "Résultat de ValidateProfile ; validé ≠ appliqué.",
+      "fields": [
+        { "name": "kind", "type": "enum:ResultKind", "const": "validation" },
+        { "name": "valid", "type": "bool" },
+        { "name": "normalized", "type": "type:ProfileDocument", "nullable": true },
+        { "name": "diagnostics", "type": { "array": "type:Diagnostic", "maxItemsFrom": "MaxDiagnostics" } }
+      ] },
+    { "id": "HardwareVolumeResult", "contract": "C5", "doc": "Valeurs matérielles réellement relues après SetHardwareVolume.",
+      "fields": [
+        { "name": "kind", "type": "enum:ResultKind", "const": "hardwareVolume" },
+        { "name": "ksChannel", "type": "u32", "min": 0, "max": 5, "nullable": true },
+        { "name": "levelDb", "type": "f64", "minFrom": "KsVolumeLevelMinDb", "exclusiveMaxFrom": "KsVolumeLevelMaxDbExclusive", "nullable": true },
+        { "name": "mute", "type": "bool", "nullable": true }
+      ] },
+    { "id": "ChannelTestResult", "contract": "C4", "doc": "Acquittement d'un test de canal.",
+      "fields": [
+        { "name": "kind", "type": "enum:ResultKind", "const": "channelTest" },
+        { "name": "testId", "type": "string", "patternFrom": "UuidPattern" },
+        { "name": "expiresInMs", "type": "u32", "maxFrom": "ChannelTestMaxExpiryMs" }
+      ] },
+    { "id": "NegotiatedFormat", "contract": "C7", "doc": "Format réellement négocié d'une connexion.",
+      "fields": [
+        { "name": "sampleRate", "type": "u32", "minFrom": "DspSampleRateMin", "maxFrom": "DspSampleRateMax" },
+        { "name": "channelMask", "type": "u32", "allowedFrom": "SupportedStreamMasks" },
+        { "name": "channelCount", "type": "u32", "min": 1, "max": 8 },
+        { "name": "sampleFormat", "type": "enum:SampleFormat" }
+      ] },
+    { "id": "BypassState", "contract": "C7", "doc": "Motif de bypass observé ou inconnu.",
+      "fields": [
+        { "name": "kind", "type": "enum:BypassKind" },
+        { "name": "reason", "type": "enum:BypassReason", "nullable": true,
+          "when": [
+            { "field": "kind", "in": ["observed"], "then": "nonNull" },
+            { "field": "kind", "in": ["none"], "then": "null" }
+          ] }
+      ] },
+    { "id": "ApoInstanceState", "contract": "C7", "doc": "Instance SFX/EFX active.",
+      "fields": [
+        { "name": "instanceId", "type": "string", "patternFrom": "InstanceIdPattern" },
+        { "name": "stage", "type": "enum:ApoStage" },
+        { "name": "epoch", "type": "u64" },
+        { "name": "appliedGeneration", "type": "u64" },
+        { "name": "inputFormat", "type": "type:NegotiatedFormat", "nullable": true },
+        { "name": "bypass", "type": "type:BypassState" }
+      ] },
+    { "id": "JackState", "contract": "C5", "doc": "État publié à Windows et sa fiabilité ; jamais une présence physique prouvée.",
+      "fields": [
+        { "name": "reliability", "type": "enum:JackReliability" },
+        { "name": "publishedConnected", "type": "bool", "nullable": true }
+      ] },
+    { "id": "MeterState", "contract": "C7", "doc": "Crêtes de sortie APO (≠ niveaux analogiques) et réduction du limiteur.",
+      "fields": [
+        { "name": "ageMs", "type": "u32" },
+        { "name": "stale", "type": "bool" },
+        { "name": "outputPeakDbfs", "type": { "array": { "type": "f64", "minFrom": "MeterFloorDbfs", "max": 40 }, "lengthFrom": "PhysicalOutputChannels" }, "doc": "Ordre physique FL FR FC LFE SL SR." },
+        { "name": "limiterReductionDb", "type": "f64", "min": 0, "max": 200 },
+        { "name": "nonFiniteFrames", "type": "u64" },
+        { "name": "telemetryLost", "type": "u64" }
+      ] },
+    { "id": "AgentState", "contract": "C7", "doc": "État versionné de l'agent pour un endpoint.",
+      "versionField": { "name": "schemaVersion", "supported": 1 },
+      "fields": [
+        { "name": "schemaVersion", "type": "u32", "const": 1 },
+        { "name": "endpointKey", "type": "string", "patternFrom": "EndpointKeyPattern" },
+        { "name": "endpointRole", "type": "enum:EndpointRole" },
+        { "name": "revision", "type": "u64", "doc": "Révision de configuration de l'endpoint ; 0 = jamais écrite." },
+        { "name": "driver", "type": "type:DriverInfo" },
+        { "name": "negotiatedFormat", "type": "type:NegotiatedFormat", "nullable": true },
+        { "name": "profileId", "type": "string", "patternFrom": "UuidPattern", "nullable": true },
+        { "name": "listeningMode", "type": "enum:ListeningMode", "nullable": true },
+        { "name": "requestedPolicy", "type": "enum:SourcePolicy", "nullable": true },
+        { "name": "resolvedPolicy", "type": "enum:ResolvedPolicy" },
+        { "name": "desiredGeneration", "type": "u64" },
+        { "name": "committedGeneration", "type": "u64" },
+        { "name": "partiallyApplied", "type": "bool" },
+        { "name": "instances", "type": { "array": "type:ApoInstanceState", "maxItemsFrom": "MaxApoInstances" } },
+        { "name": "jack", "type": "type:JackState" },
+        { "name": "meters", "type": "type:MeterState", "nullable": true }
+      ] },
+    { "id": "StateResult", "contract": "C4", "doc": "Résultat de GetState.",
+      "fields": [
+        { "name": "kind", "type": "enum:ResultKind", "const": "state" },
+        { "name": "state", "type": "type:AgentState" }
+      ] },
+    { "id": "ControlResponse", "contract": "C4", "doc": "Réponse IPC agent → centre. Export JSON réussi ≠ profil appliqué.",
+      "fields": [
+        { "name": "requestId", "type": "string", "patternFrom": "UuidPattern" },
+        { "name": "status", "type": "enum:ResponseStatus" },
+        { "name": "revision", "type": "u64" },
+        { "name": "desiredGeneration", "type": "u64" },
+        { "name": "committedGeneration", "type": "u64" },
+        { "name": "appliedInstances", "type": { "array": "type:InstanceGeneration", "maxItemsFrom": "MaxApoInstances" } },
+        { "name": "error", "type": "type:ErrorInfo", "nullable": true,
+          "when": [ { "field": "status", "in": ["Error"], "then": "nonNull", "else": "null" } ] },
+        { "name": "result", "type": "union:ControlResult", "nullable": true, "required": false,
+          "when": [ { "field": "status", "in": ["Error"], "then": "null" } ],
+          "doc": "[D] Ajout nécessaire à GetState/GetCapabilities/ValidateProfile ; absent ou null sinon." }
+      ] },
+    { "id": "StateNotification", "contract": "C4", "doc": "[D] Notification poussée après SubscribeState.",
+      "fields": [
+        { "name": "requestId", "type": "string", "patternFrom": "UuidPattern", "doc": "requestId de l'abonnement." },
+        { "name": "sequence", "type": "u64" },
+        { "name": "state", "type": "type:AgentState" }
+      ] },
+    { "id": "ChannelTestCommand", "contract": "C4", "doc": "Commande éphémère agent → APO, distincte du document CAPX.",
+      "fields": [
+        { "name": "epoch", "type": "u64" },
+        { "name": "generation", "type": "u64", "min": 1 },
+        { "name": "testId", "type": "string", "patternFrom": "UuidPattern" },
+        { "name": "channelBit", "type": "u32", "allowedFrom": "PhysicalOutputChannelBits" },
+        { "name": "frequencyHz", "type": "f64", "min": 20, "max": 20000, "nyquist": true },
+        { "name": "levelDb", "type": "f64", "min": -60, "maxFrom": "ChannelTestMaxLevelDb" },
+        { "name": "expiresQpc", "type": "u64", "doc": "Compteur QPC monotone ; au plus 2 s après renouvellement." }
+      ] },
+    { "id": "ChannelTestStop", "contract": "C4", "doc": "Arrêt explicite éphémère agent → APO.",
+      "fields": [
+        { "name": "epoch", "type": "u64" },
+        { "name": "generation", "type": "u64", "min": 1 },
+        { "name": "testId", "type": "string", "patternFrom": "UuidPattern" },
+        { "name": "stop", "type": "bool", "const": true }
+      ] },
+    { "id": "TelemetrySample", "contract": "C7", "doc": "Mesure éphémère APO → agent ; aucun PCM utilisateur.",
+      "fields": [
+        { "name": "epoch", "type": "u64" },
+        { "name": "instanceId", "type": "string", "patternFrom": "InstanceIdPattern" },
+        { "name": "sequence", "type": "u64" },
+        { "name": "qpc", "type": "u64" },
+        { "name": "outputPeakDbfs", "type": { "array": { "type": "f64", "minFrom": "MeterFloorDbfs", "max": 40 }, "lengthFrom": "PhysicalOutputChannels" } },
+        { "name": "limiterReductionDb", "type": "f64", "min": 0, "max": 200 },
+        { "name": "nonFiniteFrames", "type": "u64" },
+        { "name": "lostSamples", "type": "u64" }
+      ] }
+  ],
+  "unions": [
+    { "id": "HardwareVolumePayload", "contract": "C5", "discriminator": "control", "members": ["VolumeLevelControl", "MuteControl"], "doc": "Charge utile de SetHardwareVolume." },
+    { "id": "ControlResult", "contract": "C4", "discriminator": "kind", "members": ["CapabilitiesResult", "StateResult", "ValidationResult", "HardwareVolumeResult", "ChannelTestResult"], "doc": "Résultat typé d'une réponse." }
+  ],
+  "semanticRules": [
+    { "id": "json.tooLarge", "contract": "C3", "doc": "Document > MaxDocumentBytes octets." },
+    { "id": "json.tooDeep", "contract": "C3", "doc": "Imbrication > MaxDocumentDepth." },
+    { "id": "json.encoding", "contract": "C3", "doc": "UTF-8 invalide ou BOM." },
+    { "id": "json.syntax", "contract": "C3", "doc": "JSON invalide ou contenu après la valeur." },
+    { "id": "json.duplicateKey", "contract": "C3", "doc": "Clé dupliquée dans un objet." },
+    { "id": "json.nonFinite", "contract": "C3", "doc": "NaN, Infinity ou nombre hors de la plage double." },
+    { "id": "json.surrogate", "contract": "C3", "doc": "Demi-paire de substitution isolée dans une chaîne." },
+    { "id": "version.unsupportedMajor", "contract": "C3", "doc": "Version majeure inconnue : refus, jamais d'interprétation approximative." },
+    { "id": "version.invalid", "contract": "C3", "doc": "Champ de version qui n'est pas un entier littéral." },
+    { "id": "semantic.delayExceedsMax", "contract": "C3", "doc": "channelDelayMs[i] > maxDelayMs." },
+    { "id": "semantic.nyquist", "contract": "C3", "doc": "Fréquence ≥ Nyquist de la fréquence d'échantillonnage du contexte (toutes bandes, activées ou non)." },
+    { "id": "semantic.sampleRateRange", "contract": "C1", "doc": "Fréquence de contexte hors de la plage DSP portable." },
+    { "id": "endpoint.sampleRateUnsupported", "contract": "C3", "doc": "Fréquence non annoncée par le rendu Xonar (validation d'endpoint, distincte du DSP)." },
+    { "id": "semantic.capxPayloadNotNormalized", "contract": "C3", "doc": "Charge utile CAPX non complète (non normalisée)." },
+    { "id": "semantic.generationOrder", "contract": "C3", "doc": "committedGeneration > desiredGeneration." },
+    { "id": "semantic.appliedAheadOfCommitted", "contract": "C3", "doc": "appliedGeneration d'une instance > committedGeneration." },
+    { "id": "semantic.partiallyAppliedMismatch", "contract": "C3", "doc": "partiallyApplied incohérent avec les générations des instances." },
+    { "id": "semantic.appliedStatusMismatch", "contract": "C4", "doc": "status Applied sans instance ou avec une instance en retard." },
+    { "id": "semantic.duplicateInstance", "contract": "C7", "doc": "instanceId dupliqué." },
+    { "id": "semantic.staleMeters", "contract": "C7", "doc": "Mesure de plus de 2 s non marquée périmée, ou marquée périmée à tort." },
+    { "id": "semantic.maskChannelCount", "contract": "C1", "doc": "Nombre de canaux différent du nombre de bits du masque." },
+    { "id": "semantic.resolvedPolicy", "contract": "C2", "doc": "Politique résolue incompatible avec le mode (2.0/2.1 neutres) ou la demande." },
+    { "id": "semantic.channelTestExpiry", "contract": "C4", "doc": "Expiration passée ou à plus de 2 s du compteur QPC courant." }
+  ],
+  "schemas": [
+    { "key": "profile-v1", "file": "configs/profiles/profile-v1.schema.json", "id": "https://github.com/xonar-se-open-driver/configs/profiles/profile-v1.schema.json",
+      "title": "Profil Xonar SE v1", "description": "Document de profil v1 (C3) et enveloppe CAPX (#/$defs/CapxDocument). Généré depuis contracts/manifest.json ; ne pas éditer.",
+      "root": ["ProfileDocument"], "entries": ["ProfileDocument", "CapxDocument"] },
+    { "key": "control-v1", "file": "configs/profiles/control-v1.schema.json", "id": "https://github.com/xonar-se-open-driver/configs/profiles/control-v1.schema.json",
+      "title": "IPC de contrôle Xonar SE v1", "description": "Messages du named pipe C4 (requête, réponse, notification) et commandes éphémères de test de canal. Généré depuis contracts/manifest.json ; ne pas éditer.",
+      "root": ["ControlRequest", "ControlResponse", "StateNotification"], "entries": ["ControlRequest", "ControlResponse", "StateNotification", "ChannelTestCommand", "ChannelTestStop"] },
+    { "key": "state-v1", "file": "configs/profiles/state-v1.schema.json", "id": "https://github.com/xonar-se-open-driver/configs/profiles/state-v1.schema.json",
+      "title": "État d'agent Xonar SE v1", "description": "État versionné de l'agent (C3/C7) et échantillon de télémétrie éphémère. Généré depuis contracts/manifest.json ; ne pas éditer.",
+      "root": ["AgentState"], "entries": ["AgentState", "TelemetrySample"] }
+  ],
+  "v0": { "schemaFile": "configs/profiles/profile.schema.json", "examplesDir": "configs/examples", "doc": "Schéma v0 conservé pour l'import ; jamais réécrit." },
+  "fixtures": [
+    { "dir": "configs/examples/v1/profiles", "target": "profile-v1#ProfileDocument" },
+    { "dir": "configs/examples/v1/normalized", "target": "profile-v1#ProfileDocument" },
+    { "dir": "configs/examples/v1/migrations", "target": "profile-v1#ProfileDocument" },
+    { "dir": "configs/examples/v1/capx", "target": "profile-v1#CapxDocument" },
+    { "dir": "configs/examples/v1/control", "target": "control-v1" },
+    { "dir": "configs/examples/v1/ephemeral/channel-test", "target": "control-v1#ChannelTestCommand" },
+    { "dir": "configs/examples/v1/ephemeral/channel-test-stop", "target": "control-v1#ChannelTestStop" },
+    { "dir": "configs/examples/v1/ephemeral/telemetry", "target": "state-v1#TelemetrySample" },
+    { "dir": "configs/examples/v1/state", "target": "state-v1" }
+  ],
+  "outputs": {
+    "cppHeader": "contracts/generated/cpp/include/xonar/contracts/v1/contracts.hpp",
+    "csharp": "contracts/generated/csharp/Xonar.Contracts.V1.g.cs",
+    "cppDspConformance": "tests/contracts/cpp/dsp_conformance.g.inc"
+  }
+}

@@ -1,0 +1,45 @@
+<Window
+    x:Class="Xonar.ControlCenter.Shell.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Centre de contrôle Xonar SE">
+
+    <Grid Background="{StaticResource CockpitWindowBrush}" RequestedTheme="Dark">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="236" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ===================== SIDEBAR ===================== -->
+        <Grid Grid.Column="0" Background="{StaticResource CockpitSurfaceInsetBrush}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Logo / en-tête -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,22,20,16" Spacing="11">
+                <FontIcon Glyph="&#xE9D9;" FontSize="22" Foreground="{StaticResource CockpitAccentBrush}" VerticalAlignment="Center" />
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="XONAR SE" FontSize="16" FontWeight="Bold" CharacterSpacing="80"
+                               Foreground="{StaticResource CockpitTextPrimaryBrush}" />
+                    <TextBlock Text="Centre de contrôle" FontSize="11"
+                               Foreground="{StaticResource CockpitTextTertiaryBrush}" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Navigation (construite en code) -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,4">
+                <StackPanel x:Name="NavPanel" />
+            </ScrollViewer>
+
+            <!-- Pied : version du pilote -->
+            <TextBlock Grid.Row="2" x:Name="DriverFooter" Text="Pilote 0.3.3.0" Margin="24,0,0,16"
+                       FontSize="11" Foreground="{StaticResource CockpitTextTertiaryBrush}" />
+        </Grid>
+
+        <!-- ===================== CONTENU ===================== -->
+        <Grid x:Name="Host" Grid.Column="1" />
+    </Grid>
+</Window>

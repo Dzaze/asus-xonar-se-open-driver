@@ -1,0 +1,553 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xonar-se-open-driver/configs/profiles/state-v1.schema.json",
+  "title": "État d'agent Xonar SE v1",
+  "description": "État versionné de l'agent (C3/C7) et échantillon de télémétrie éphémère. Généré depuis contracts/manifest.json ; ne pas éditer.",
+  "$comment": "Généré par contracts/generate.py depuis contracts/manifest.json (sha256 45fee5376e713c752dbf22bec73fca519f555bbcf341fce018e6d997e3a032a8). Ne pas éditer.",
+  "$ref": "#/$defs/AgentState",
+  "$defs": {
+    "AgentState": {
+      "description": "État versionné de l'agent pour un endpoint.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "endpointKey",
+        "endpointRole",
+        "revision",
+        "driver",
+        "negotiatedFormat",
+        "profileId",
+        "listeningMode",
+        "requestedPolicy",
+        "resolvedPolicy",
+        "desiredGeneration",
+        "committedGeneration",
+        "partiallyApplied",
+        "instances",
+        "jack",
+        "meters"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "const": 1
+        },
+        "endpointKey": {
+          "type": "string",
+          "pattern": "^[!-~]{1,256}$"
+        },
+        "endpointRole": {
+          "$ref": "#/$defs/EndpointRole"
+        },
+        "revision": {
+          "description": "Révision de configuration de l'endpoint ; 0 = jamais écrite.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "driver": {
+          "$ref": "#/$defs/DriverInfo"
+        },
+        "negotiatedFormat": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NegotiatedFormat"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "profileId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "listeningMode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ListeningMode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requestedPolicy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourcePolicy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolvedPolicy": {
+          "$ref": "#/$defs/ResolvedPolicy"
+        },
+        "desiredGeneration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "committedGeneration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "partiallyApplied": {
+          "type": "boolean"
+        },
+        "instances": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ApoInstanceState"
+          },
+          "maxItems": 64
+        },
+        "jack": {
+          "$ref": "#/$defs/JackState"
+        },
+        "meters": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MeterState"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "EndpointRole": {
+      "description": "Rôle d'endpoint ; v1 : haut-parleurs seulement.",
+      "type": "string",
+      "enum": [
+        "speakers"
+      ]
+    },
+    "DriverInfo": {
+      "description": "Pilote observé ; version et empreinte nulles si inconnues.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "version",
+        "packageSha256"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/DriverKind"
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9]{1,5}\\.[0-9]{1,5}\\.[0-9]{1,5}\\.[0-9]{1,5}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "packageSha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "DriverKind": {
+      "description": "Pilote noyau observé pour l'endpoint.",
+      "type": "string",
+      "enum": [
+        "xonarse",
+        "usbaudio2",
+        "unknown"
+      ]
+    },
+    "NegotiatedFormat": {
+      "description": "Format réellement négocié d'une connexion.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sampleRate",
+        "channelMask",
+        "channelCount",
+        "sampleFormat"
+      ],
+      "properties": {
+        "sampleRate": {
+          "type": "integer",
+          "minimum": 8000,
+          "maximum": 384000
+        },
+        "channelMask": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295,
+          "enum": [
+            3,
+            63,
+            1551
+          ]
+        },
+        "channelCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8
+        },
+        "sampleFormat": {
+          "$ref": "#/$defs/SampleFormat"
+        }
+      }
+    },
+    "SampleFormat": {
+      "description": "[D] Format d'échantillon de la connexion négociée.",
+      "type": "string",
+      "enum": [
+        "float32",
+        "pcm16",
+        "pcm24",
+        "pcm32",
+        "unknown"
+      ]
+    },
+    "ListeningMode": {
+      "description": "Mode de sortie persistant. Sortie Windows toujours 6 canaux / 0x60F.",
+      "type": "string",
+      "enum": [
+        "5.1",
+        "upmix",
+        "2.1",
+        "2.0"
+      ]
+    },
+    "SourcePolicy": {
+      "description": "Politique par flux négocié demandée par le profil.",
+      "type": "string",
+      "enum": [
+        "preserve",
+        "autoDeclaredLayout",
+        "forceStereoFrontPair"
+      ]
+    },
+    "ResolvedPolicy": {
+      "description": "Politique effectivement résolue, rapportée par l'agent.",
+      "type": "string",
+      "enum": [
+        "preserve",
+        "autoDeclaredLayout",
+        "forceStereoFrontPair",
+        "neutral",
+        "conservative"
+      ]
+    },
+    "ApoInstanceState": {
+      "description": "Instance SFX/EFX active.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "instanceId",
+        "stage",
+        "epoch",
+        "appliedGeneration",
+        "inputFormat",
+        "bypass"
+      ],
+      "properties": {
+        "instanceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:{}-]{1,128}$"
+        },
+        "stage": {
+          "$ref": "#/$defs/ApoStage"
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "appliedGeneration": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "inputFormat": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NegotiatedFormat"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bypass": {
+          "$ref": "#/$defs/BypassState"
+        }
+      }
+    },
+    "ApoStage": {
+      "description": "Étage APO : SFX par flux avant mixage, EFX après mixage.",
+      "type": "string",
+      "enum": [
+        "SFX",
+        "EFX"
+      ]
+    },
+    "BypassState": {
+      "description": "Motif de bypass observé ou inconnu.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "reason"
+      ],
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/BypassKind"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BypassReason"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "observed"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "not": {
+                  "type": "null"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": [
+                  "none"
+                ]
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "reason": {
+                "type": "null"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "BypassKind": {
+      "description": "Motif de bypass : observé ou inconnu, jamais supposé.",
+      "type": "string",
+      "enum": [
+        "none",
+        "observed",
+        "unknown"
+      ]
+    },
+    "BypassReason": {
+      "description": "[D] Motifs de bypass mesurés de la matrice C2.",
+      "type": "string",
+      "enum": [
+        "exclusiveMode",
+        "raw",
+        "enhancementsDisabled",
+        "offload",
+        "drm",
+        "iec61937",
+        "formatUnsupported",
+        "other"
+      ]
+    },
+    "JackState": {
+      "description": "État publié à Windows et sa fiabilité ; jamais une présence physique prouvée.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reliability",
+        "publishedConnected"
+      ],
+      "properties": {
+        "reliability": {
+          "$ref": "#/$defs/JackReliability"
+        },
+        "publishedConnected": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "JackReliability": {
+      "description": "Fiabilité de l'état jack publié : sous HonorJackDetection=0, connecté ne prouve pas la présence physique.",
+      "type": "string",
+      "enum": [
+        "reported",
+        "forcedConnection",
+        "unknown"
+      ]
+    },
+    "MeterState": {
+      "description": "Crêtes de sortie APO (≠ niveaux analogiques) et réduction du limiteur.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ageMs",
+        "stale",
+        "outputPeakDbfs",
+        "limiterReductionDb",
+        "nonFiniteFrames",
+        "telemetryLost"
+      ],
+      "properties": {
+        "ageMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        "stale": {
+          "type": "boolean"
+        },
+        "outputPeakDbfs": {
+          "description": "Ordre physique FL FR FC LFE SL SR.",
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -200,
+            "maximum": 40
+          },
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "limiterReductionDb": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "nonFiniteFrames": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "telemetryLost": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        }
+      }
+    },
+    "TelemetrySample": {
+      "description": "Mesure éphémère APO → agent ; aucun PCM utilisateur.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "epoch",
+        "instanceId",
+        "sequence",
+        "qpc",
+        "outputPeakDbfs",
+        "limiterReductionDb",
+        "nonFiniteFrames",
+        "lostSamples"
+      ],
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "instanceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._:{}-]{1,128}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "qpc": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "outputPeakDbfs": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -200,
+            "maximum": 40
+          },
+          "minItems": 6,
+          "maxItems": 6
+        },
+        "limiterReductionDb": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "nonFiniteFrames": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        "lostSamples": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        }
+      }
+    }
+  }
+}

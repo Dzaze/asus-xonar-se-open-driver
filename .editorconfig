@@ -1,0 +1,32 @@
+# Conventions d'édition communes au projet Xonar SE Open Driver
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.{cmake,txt}]
+indent_size = 4
+
+[*.py]
+indent_size = 4
+
+# Scripts PowerShell et fichiers INF : fins de ligne Windows
+[*.{ps1,psm1,psd1}]
+end_of_line = crlf
+
+[*.{inf,inx}]
+end_of_line = crlf
+
+[Makefile]
+indent_style = tab

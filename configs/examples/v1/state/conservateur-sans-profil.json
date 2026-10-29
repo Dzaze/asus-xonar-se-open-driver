@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "endpointKey": "usb-0b05-189d-mi00:speakers:1",
+  "endpointRole": "speakers",
+  "revision": 0,
+  "driver": {
+    "kind": "usbaudio2",
+    "version": null,
+    "packageSha256": null
+  },
+  "negotiatedFormat": null,
+  "profileId": null,
+  "listeningMode": null,
+  "requestedPolicy": null,
+  "resolvedPolicy": "conservative",
+  "desiredGeneration": 0,
+  "committedGeneration": 0,
+  "partiallyApplied": false,
+  "instances": [],
+  "jack": {
+    "reliability": "unknown",
+    "publishedConnected": null
+  },
+  "meters": null
+}

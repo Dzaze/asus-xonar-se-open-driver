@@ -1,0 +1,26 @@
+{
+  "requestId": "0b7c86e4-2d1b-4c55-9a43-2c1f6a1e000b",
+  "status": "Ok",
+  "revision": 5,
+  "desiredGeneration": 12,
+  "committedGeneration": 12,
+  "appliedInstances": [],
+  "error": null,
+  "result": {
+    "kind": "validation",
+    "valid": false,
+    "normalized": null,
+    "diagnostics": [
+      {
+        "code": "schema.enum",
+        "path": "/listeningMode",
+        "message": "valeur '7.1' hors de ['5.1', 'upmix', '2.1', '2.0']"
+      },
+      {
+        "code": "schema.maximum",
+        "path": "/output/masterGainDb",
+        "message": "99 > 6"
+      }
+    ]
+  }
+}

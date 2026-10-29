@@ -1,0 +1,20 @@
+Xonar SE Open Driver - Benoist Pirolley
+
+The project sources are licensed under Apache-2.0.
+Bundled Microsoft and third-party components retain their own licenses.
+
+.NET runtime: MIT, with third-party notices. See dotnet-LICENSE.txt and
+dotnet-THIRD-PARTY-NOTICES.txt. https://github.com/dotnet/runtime
+
+Windows App SDK 1.8.260921001: see WindowsAppSDK-license.txt and
+WindowsAppSDK-NOTICE.txt. https://github.com/microsoft/WindowsAppSDK
+
+H.NotifyIcon 2.1.0: MIT. See H.NotifyIcon-LICENSE.txt.
+https://github.com/HavenDV/H.NotifyIcon
+
+Microsoft Visual C++ Redistributable: Microsoft Software License Terms.
+The original Microsoft-signed redistribution package is included unchanged.
+Its own installer and licensing terms apply. It is not Apache-licensed.
+
+Windows SDK and WDK headers/libraries are build-time tools. No ASUS, C-Media
+or ASMedia proprietary driver binary is included in this distribution.

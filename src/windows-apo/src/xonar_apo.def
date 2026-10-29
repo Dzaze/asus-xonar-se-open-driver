@@ -1,0 +1,8 @@
+; SPDX-License-Identifier: Apache-2.0
+; Exports COM de la DLL APO Xonar SE.
+LIBRARY XonarApo
+EXPORTS
+    DllGetClassObject   PRIVATE
+    DllCanUnloadNow     PRIVATE
+    DllRegisterServer   PRIVATE
+    DllUnregisterServer PRIVATE

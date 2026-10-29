@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Manifeste de dépendances du centre de contrôle",
+  "description": "Versions épinglées par E2-05. Toute évolution passe par ce fichier et le csproj ; ne pas modifier l'un sans l'autre.",
+  "pinned": [
+    {
+      "id": "Microsoft.WindowsAppSDK",
+      "version": "1.6.240923002",
+      "source": "https://www.nuget.org/packages/Microsoft.WindowsAppSDK",
+      "notes": "Version stable 1.6.0. Numéro de build 240923002 ; À CONFIRMER au premier dotnet restore si le flux local ne résout pas ce build exact.",
+      "status": "à confirmer au build"
+    },
+    {
+      "id": "Microsoft.Windows.SDK.BuildTools",
+      "version": "10.0.22621.3233",
+      "source": "https://www.nuget.org/packages/Microsoft.Windows.SDK.BuildTools",
+      "notes": "Build Tools pour la cible net8.0-windows10.0.19041.0 ; À CONFIRMER au build.",
+      "status": "à confirmer au build"
+    },
+    {
+      "id": "Microsoft.NETCore.App.Ref",
+      "version": "8.0",
+      "source": "https://dotnet.microsoft.com/en-us/download/dotnet/8.0",
+      "notes": "Runtime .NET 8.0 LTS (novembre 2023). Vérifiable sur la page officielle des téléchargements .NET.",
+      "status": "vérifiable"
+    }
+  ],
+  "bootstrap": {
+    "windowsAppSdk": "dépendant du framework, non autonome",
+    "unpackaged": true,
+    "property": "WindowsAppSDKBootstrapInitialize",
+    "status": "à confirmer selon la version 1.6 du SDK"
+  }
+}

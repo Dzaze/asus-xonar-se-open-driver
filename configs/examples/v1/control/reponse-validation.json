@@ -1,0 +1,589 @@
+{
+  "requestId": "0b7c86e4-2d1b-4c55-9a43-2c1f6a1e0003",
+  "status": "Ok",
+  "revision": 5,
+  "desiredGeneration": 12,
+  "committedGeneration": 12,
+  "appliedInstances": [],
+  "error": null,
+  "result": {
+    "kind": "validation",
+    "valid": true,
+    "normalized": {
+      "schemaVersion": 1,
+      "profileId": "40cb4ea8-4774-4cd1-9d29-5d305412d49e",
+      "revision": 1,
+      "endpointRole": "speakers",
+      "listeningMode": "upmix",
+      "sourcePolicy": "autoDeclaredLayout",
+      "routing": {
+        "upmix": {
+          "centerGainDb": -3,
+          "surroundGainDb": -6,
+          "deriveLfe": true,
+          "lfeGainDb": -6,
+          "lfeLowPassHz": 120
+        }
+      },
+      "output": {
+        "masterGainDb": 0,
+        "channelGainDb": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "channelDelayMs": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "channelMute": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "eq": [
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ],
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ],
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ],
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ],
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ],
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ],
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ],
+          [
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            },
+            {
+              "enabled": false,
+              "frequencyHz": 1000,
+              "q": 1,
+              "gainDb": 0
+            }
+          ]
+        ],
+        "downmix": {
+          "centerGainDb": -3,
+          "surroundGainDb": -3,
+          "includeLfe": false,
+          "lfeGainDb": -6,
+          "headroomDb": -4.5
+        },
+        "twoPointOne": {
+          "lfeGainDb": 0,
+          "lfeLowPassHz": 80,
+          "includeSourceLfe": true,
+          "sourceLfeGainDb": 0
+        },
+        "bassManagement": {
+          "enabled": false,
+          "crossoverHz": 80,
+          "highPassSatellites": true,
+          "sumToLfe": true,
+          "sumToLfeGainDb": 0
+        },
+        "limiter": {
+          "enabled": true,
+          "ceilingDb": -0.3,
+          "releaseMs": 80
+        },
+        "gainRampMs": 20,
+        "maxDelayMs": 50
+      }
+    },
+    "diagnostics": []
+  }
+}

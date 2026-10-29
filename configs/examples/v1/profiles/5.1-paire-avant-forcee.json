@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "profileId": "6c405edb-dc26-421d-bf02-5594c5d4c241",
+  "revision": 1,
+  "name": "Paire avant forcée",
+  "description": "Intervention explicite : seuls FL/FR de chaque flux sont conservés.",
+  "endpointRole": "speakers",
+  "listeningMode": "5.1",
+  "sourcePolicy": "forceStereoFrontPair",
+  "routing": {},
+  "output": {}
+}

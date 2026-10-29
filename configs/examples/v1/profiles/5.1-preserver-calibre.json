@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "profileId": "7da228a7-ea57-4903-8773-bb559c88dab9",
+  "revision": 3,
+  "name": "5.1 natif calibré",
+  "description": "Sources 5.1 préservées, stéréo étendue FL/FR ; trims et délais de calibration, bass management 80 Hz.",
+  "endpointRole": "speakers",
+  "listeningMode": "5.1",
+  "sourcePolicy": "preserve",
+  "routing": {},
+  "output": {
+    "masterGainDb": -2,
+    "channelGainDb": [
+      0,
+      0,
+      -1.5,
+      3,
+      0,
+      0,
+      -2,
+      -2
+    ],
+    "channelDelayMs": [
+      0,
+      0,
+      0.5,
+      2,
+      0,
+      0,
+      7.25,
+      7.25
+    ],
+    "bassManagement": {
+      "enabled": true,
+      "crossoverHz": 80,
+      "highPassSatellites": true,
+      "sumToLfe": true,
+      "sumToLfeGainDb": 0
+    },
+    "limiter": {
+      "enabled": true,
+      "ceilingDb": -1,
+      "releaseMs": 120
+    }
+  }
+}

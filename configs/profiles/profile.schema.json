@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/xonar-se-open-driver/configs/profiles/profile.schema.json",
+  "title": "Profil de traitement Xonar SE Open Driver",
+  "description": "Miroir sérialisable de la structure xonar::dsp::Profile (src/dsp-core/include/xonar/dsp/profile.hpp). Les tableaux indexés par canal suivent l'ordre FL, FR, FC, LFE, BL, BR, SL, SR (valeur de l'énumération Channel), pas la position dans la trame.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mode", "sampleRate", "inputMask", "outputMask"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string", "maxLength": 80, "description": "Nom lisible du profil (hors structure C++)." },
+    "description": { "type": "string", "maxLength": 500 },
+    "mode": {
+      "type": "string",
+      "enum": ["PassThrough", "Upmix2to6", "Downmix6to2", "TwoPointOne", "ChannelTest"]
+    },
+    "sampleRate": {
+      "type": "integer",
+      "enum": [44100, 48000, 88200, 96000, 176400, 192000]
+    },
+    "inputMask": {
+      "$ref": "#/$defs/channelMask",
+      "description": "Masque KSAUDIO_SPEAKER_* du flux d'entrée (ex. 3 = stéréo, 1551 = 5.1 latéral 0x60F, 63 = 5.1 arrière 0x3F)."
+    },
+    "outputMask": { "$ref": "#/$defs/channelMask" },
+    "masterGainDb": { "type": "number", "minimum": -60, "maximum": 6, "default": 0 },
+    "channelGainDb": { "$ref": "#/$defs/perChannelNumber", "default": [0, 0, 0, 0, 0, 0, 0, 0] },
+    "channelDelayMs": {
+      "type": "array", "minItems": 8, "maxItems": 8,
+      "items": { "type": "number", "minimum": 0, "maximum": 50 },
+      "default": [0, 0, 0, 0, 0, 0, 0, 0]
+    },
+    "channelMute": {
+      "type": "array", "minItems": 8, "maxItems": 8,
+      "items": { "type": "boolean" },
+      "default": [false, false, false, false, false, false, false, false]
+    },
+    "eq": {
+      "type": "array", "minItems": 8, "maxItems": 8,
+      "description": "Dix bandes paramétriques par canal, indexées par valeur de Channel.",
+      "items": {
+        "type": "array", "minItems": 10, "maxItems": 10,
+        "items": { "$ref": "#/$defs/eqBand" }
+      }
+    },
+    "upmix": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "centerGainDb": { "type": "number", "minimum": -30, "maximum": 0, "default": -3 },
+        "surroundGainDb": { "type": "number", "minimum": -30, "maximum": 0, "default": -6 },
+        "deriveLfe": { "type": "boolean", "default": true },
+        "lfeGainDb": { "type": "number", "minimum": -30, "maximum": 0, "default": -6 },
+        "lfeLowPassHz": { "type": "number", "minimum": 40, "maximum": 250, "default": 120 }
+      }
+    },
+    "downmix": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "centerGainDb": { "type": "number", "minimum": -30, "maximum": 0, "default": -3 },
+        "surroundGainDb": { "type": "number", "minimum": -30, "maximum": 0, "default": -3 },
+        "includeLfe": { "type": "boolean", "default": false },
+        "lfeGainDb": { "type": "number", "minimum": -30, "maximum": 0, "default": -6 },
+        "headroomDb": { "type": "number", "minimum": -12, "maximum": 0, "default": -4.5 }
+      }
+    },
+    "twoPointOne": {
+      "type": "object", "additionalProperties": false,
+      "description": "Mode 2.1 virtuel sur la sortie 5.1 : avant intact, caisson = passe-bas de la somme, centre et surrounds muets.",
+      "properties": {
+        "lfeGainDb": { "type": "number", "minimum": -30, "maximum": 6, "default": 0 },
+        "lfeLowPassHz": { "type": "number", "minimum": 40, "maximum": 200, "default": 80 },
+        "includeSourceLfe": { "type": "boolean", "default": true },
+        "sourceLfeGainDb": { "type": "number", "minimum": -30, "maximum": 6, "default": 0 }
+      }
+    },
+    "bassManagement": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "crossoverHz": { "type": "number", "minimum": 40, "maximum": 200, "default": 80 },
+        "highPassSatellites": { "type": "boolean", "default": true },
+        "sumToLfe": { "type": "boolean", "default": true },
+        "sumToLfeGainDb": { "type": "number", "minimum": -20, "maximum": 6, "default": 0 }
+      }
+    },
+    "limiter": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "ceilingDb": { "type": "number", "minimum": -12, "maximum": 0, "default": -0.3 },
+        "releaseMs": { "type": "number", "minimum": 5, "maximum": 1000, "default": 80 }
+      }
+    },
+    "test": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "channel": { "type": "string", "enum": ["FL", "FR", "FC", "LFE", "BL", "BR", "SL", "SR"], "default": "FL" },
+        "frequencyHz": { "type": "number", "minimum": 20, "maximum": 20000, "default": 440 },
+        "levelDb": { "type": "number", "minimum": -60, "maximum": -6, "default": -20 }
+      }
+    },
+    "gainRampMs": { "type": "integer", "minimum": 1, "maximum": 500, "default": 20 },
+    "maxDelayMs": { "type": "number", "minimum": 0, "maximum": 200, "default": 50 }
+  },
+  "$defs": {
+    "channelMask": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1599,
+      "description": "Somme des bits FL=1, FR=2, FC=4, LFE=8, BL=16, BR=32, SL=512, SR=1024."
+    },
+    "perChannelNumber": {
+      "type": "array", "minItems": 8, "maxItems": 8,
+      "items": { "type": "number", "minimum": -60, "maximum": 12 }
+    },
+    "eqBand": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "frequencyHz": { "type": "number", "minimum": 10, "maximum": 20000, "default": 1000 },
+        "q": { "type": "number", "exclusiveMinimum": 0, "maximum": 20, "default": 1 },
+        "gainDb": { "type": "number", "minimum": -24, "maximum": 12, "default": 0 }
+      }
+    }
+  }
+}

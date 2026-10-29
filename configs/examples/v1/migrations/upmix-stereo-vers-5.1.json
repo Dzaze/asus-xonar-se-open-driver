@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "profileId": "3f1c0a6e-5b7d-4e2a-9c8b-1d2e3f4a5b04",
+  "revision": 1,
+  "name": "Upmix stéréo vers 5.1",
+  "description": "Source stéréo redistribuée sur 5.1 (layout latéral 0x60F) : avant intact, centre (L+R)/2 à -3 dB, surrounds à -6 dB, LFE dérivé par passe-bas 120 Hz à -6 dB. Réglages conservateurs, pas de prétention spatiale.",
+  "endpointRole": "speakers",
+  "listeningMode": "upmix",
+  "sourcePolicy": "autoDeclaredLayout",
+  "routing": {
+    "upmix": {
+      "centerGainDb": -3,
+      "surroundGainDb": -6,
+      "deriveLfe": true,
+      "lfeGainDb": -6,
+      "lfeLowPassHz": 120
+    }
+  },
+  "output": {
+    "masterGainDb": 0,
+    "channelGainDb": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "channelDelayMs": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "channelMute": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "bassManagement": {
+      "enabled": false,
+      "crossoverHz": 80,
+      "highPassSatellites": true,
+      "sumToLfe": true,
+      "sumToLfeGainDb": 0
+    },
+    "limiter": {
+      "enabled": true,
+      "ceilingDb": -0.3,
+      "releaseMs": 80
+    },
+    "gainRampMs": 20,
+    "maxDelayMs": 50
+  }
+}

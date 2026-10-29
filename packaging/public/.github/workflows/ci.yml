@@ -1,0 +1,39 @@
+name: Build and tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  portable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: cmake --preset linux-gcc-debug
+      - run: cmake --build --preset linux-gcc-debug
+      - run: ctest --preset linux-gcc-debug --output-on-failure
+      - name: Control center contract and service tests
+        working-directory: apps/control-center
+        run: dotnet run --project ../../tests/ui/shell/Xonar.ControlCenter.Tests.csproj
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - run: cmake --preset msvc-ninja-release
+      - run: cmake --build --preset msvc-ninja-release
+      - run: ctest --preset msvc-ninja-release --output-on-failure
+      - name: Control center tests
+        working-directory: apps/control-center
+        run: dotnet run --project ../../tests/ui/shell/Xonar.ControlCenter.Tests.csproj
+      - name: APO installer tests without hardware changes
+        run: pwsh -File tests/integration/test-apo-installer.ps1
+      - name: Product installer tests without hardware changes
+        run: pwsh -File tests/integration/test-product-installer.ps1

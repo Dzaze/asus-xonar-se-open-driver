@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "profileId": "594822dc-72d1-4205-a376-4ec560a7a216",
+  "revision": 2,
+  "name": "2.1 virtuel",
+  "endpointRole": "speakers",
+  "listeningMode": "2.1",
+  "sourcePolicy": "preserve",
+  "routing": {},
+  "output": {
+    "twoPointOne": {
+      "lfeGainDb": -2,
+      "lfeLowPassHz": 90,
+      "includeSourceLfe": true,
+      "sourceLfeGainDb": 0
+    },
+    "bassManagement": {
+      "enabled": false,
+      "sumToLfe": false
+    },
+    "limiter": {
+      "enabled": true,
+      "ceilingDb": -0.3,
+      "releaseMs": 80
+    }
+  }
+}

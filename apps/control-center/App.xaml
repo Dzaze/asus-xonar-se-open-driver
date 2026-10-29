@@ -1,0 +1,16 @@
+<Application
+    x:Class="Xonar.ControlCenter.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <!-- Styles par défaut de WinUI (XamlControlsResources) OBLIGATOIRES : sans eux,
+             le premier contrôle stylé lève une exception et l'application plante au
+             démarrage. Puis le thème « cockpit » (sombre, turquoise) par-dessus. -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="ms-appx:///Themes/Cockpit.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
