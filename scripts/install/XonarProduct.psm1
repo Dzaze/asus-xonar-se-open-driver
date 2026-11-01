@@ -200,7 +200,7 @@ function Install-XonarProduct {
     $device=Test-XonarProductPrerequisites
     $original=Get-XonarProductDriver $device.InstanceId
     $driverFile=Join-Path $PackageRoot 'Driver\xonarse.sys'
-    $driverNeeded=$original.Service -ne 'xonarse' -or -not $original.RuntimePath -or (Get-FileHash -LiteralPath $original.RuntimePath).Hash -ne (Get-FileHash -LiteralPath $driverFile).Hash
+    $driverNeeded=$original.Service -ne 'xonarse' -or $original.Version -ne $package.DriverVersion -or -not $original.RuntimePath -or (Get-FileHash -LiteralPath $original.RuntimePath).Hash -ne (Get-FileHash -LiteralPath $driverFile).Hash
     $apo=Join-Path $PackageRoot 'bin\XonarApo.dll'
     $apoNeeded=$driverNeeded -or -not(Test-XonarApoCurrent $apo $InstallRoot)
     $certificate=Get-XonarProductCertificate (Join-Path $PackageRoot 'Certificates\XonarSeOpenDriver-TEST.cer')

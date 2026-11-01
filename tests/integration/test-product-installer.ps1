@@ -53,7 +53,7 @@ try {
             Microsoft.PowerShell.Management\Copy-Item @PSBoundParameters
         }
         $passed=0
-        foreach($case in 'ExistingNative','NewNative','ApoFailure','AppCopyFailure','TamperedPayload'){
+        foreach($case in 'ExistingNative','NativeInfUpdate','NewNative','ApoFailure','AppCopyFailure','TamperedPayload'){
             $folder=Join-Path $testRoot $case;$package=Join-Path $folder 'Package';$install=Join-Path $folder 'Install';$config=Join-Path $folder 'Config'
             $directories=@('App','Scripts','bin','Driver','Certificates','Defaults','Licenses','Prerequisites')
             foreach($name in $directories){New-Item -ItemType Directory -Path (Join-Path $package $name) -Force|Out-Null;Set-Content -LiteralPath (Join-Path $package ($name+'\marker.txt')) -Value 'package'}
@@ -66,6 +66,9 @@ try {
             $oldDriver=[pscustomobject]@{InstanceId='unit-device';InfName='oem111.inf';Version='old';Service='previous';RuntimePath=$null}
             $newDriver=[pscustomobject]@{InstanceId='unit-device';InfName='oem222.inf';Version='0.5.0.0';Service='xonarse';RuntimePath=(Join-Path $package 'Driver\xonarse.sys')}
             if($case -eq 'ExistingNative'){$oldDriver=$newDriver}
+            if($case -eq 'NativeInfUpdate'){
+                $oldDriver=[pscustomobject]@{InstanceId='unit-device';InfName='oem111.inf';Version='0.4.0.0';Service='xonarse';RuntimePath=$newDriver.RuntimePath}
+            }
             $script:tx=@{Driver=$oldDriver;OldDriver=$oldDriver;NewDriver=$newDriver;Current=$case -eq 'ExistingNative';Protection='previous-permissions';Apo='previous-apo';Shell='previous-shell';FailApo=$case -eq 'ApoFailure';FailCopy=$case -eq 'AppCopyFailure';Root=$install}
             $entries=@(Get-ChildItem -LiteralPath $package -Recurse -File|ForEach-Object {[pscustomobject]@{Path=$_.FullName.Substring($package.Length).TrimStart('\');Sha256=(Get-FileHash -LiteralPath $_.FullName).Hash}})
             [pscustomobject]@{Schema=1;HardwareId=$script:ProductHardwareId;SignerThumbprint=$script:ProductSigner;Version='test';DriverVersion='0.5.0.0';Files=$entries}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $package 'manifest.json')
@@ -73,10 +76,11 @@ try {
             if($case -eq 'TamperedPayload'){Set-Content -LiteralPath (Join-Path $package 'Driver\xonarse.sys') -Value 'tampered'}
             $failure=$null;$result=$null
             try{$result=Install-XonarProduct -PackageRoot $package -ManifestHash $hash -InstallRoot $install -ConfigRoot $config}catch{$failure=$_}
-            if($case -in 'ExistingNative','NewNative'){
+            if($case -in 'ExistingNative','NativeInfUpdate','NewNative'){
                 if($failure){throw $failure}
                 if(-not(Test-Path -LiteralPath (Join-Path $install 'App\marker.txt'))){throw 'New app missing'}
                 if($case -eq 'ExistingNative' -and ($result.DriverChanged -or $result.ApoChanged)){throw 'Existing native stack changed'}
+                if($case -eq 'NativeInfUpdate' -and -not $result.DriverChanged){throw 'New INF version skipped because SYS bytes are unchanged'}
                 Restore-XonarProduct -BackupDirectory $result.BackupDirectory
             }elseif(-not $failure){throw "Expected failure missing : $case"}
             if(-not(Test-Path -LiteralPath (Join-Path $install 'App\previous.txt'))){throw "Previous app lost : $case"}
