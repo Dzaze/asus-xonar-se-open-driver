@@ -153,4 +153,38 @@ function Test-XonarApoEffectsProtected {
         $items.Count -gt 0 -and @($items|Where-Object {-not(Test-XonarEffectsSddlProtected $_.Sddl)}).Count -eq 0
     }catch{return $false}
 }
-Export-ModuleMember -Function Protect-XonarApoEffects,Restore-XonarApoEffectsProtection,Get-XonarApoProtectionSnapshot,Restore-XonarApoProtectionSnapshot,Test-XonarApoEffectsProtected
+function Get-XonarEffectsEndpointKey { (Get-XonarSpeakerTarget).Subkey }
+function Test-XonarEffectsEndpointStable {
+    param([string]$EndpointKey)
+    # EndpointBuilder may publish a new GUID only after it restarts. Require a
+    # full second of the same protected endpoint, rather than the pre-restart GUID.
+    foreach($sample in 1..5){
+        Start-Sleep -Milliseconds 200
+        try{if((Get-XonarEffectsEndpointKey) -ne $EndpointKey -or -not(Test-XonarApoEffectsProtected)){return $false}}catch{return $false}
+    }
+    return $true
+}
+function Complete-XonarApoEffectsProtection {
+    [CmdletBinding()]
+    param([string]$InstallDir='C:\Program Files\XonarSE')
+    $audioRunning=(Get-Service Audiosrv).Status -eq 'Running'
+    $builderRunning=(Get-Service AudioEndpointBuilder).Status -eq 'Running'
+    try{
+        foreach($attempt in 1..4){
+            $key=Get-XonarEffectsEndpointKey
+            if((Test-XonarApoEffectsProtected) -and (Test-XonarEffectsEndpointStable $key)){return}
+            if($audioRunning){Stop-Service Audiosrv -Force}
+            if($builderRunning){Stop-Service AudioEndpointBuilder -Force}
+            Protect-XonarApoEffects -InstallDir $InstallDir
+            if($builderRunning){Start-Service AudioEndpointBuilder}
+            if($audioRunning){Start-Service Audiosrv}
+            $key=Get-XonarEffectsEndpointKey
+            if(Test-XonarEffectsEndpointStable $key){return}
+        }
+        throw 'La sortie Xonar ne reste pas protegee apres reconstruction. Installation non validee.'
+    }finally{
+        if($builderRunning){Start-Service AudioEndpointBuilder}
+        if($audioRunning){Start-Service Audiosrv}
+    }
+}
+Export-ModuleMember -Function Protect-XonarApoEffects,Complete-XonarApoEffectsProtection,Restore-XonarApoEffectsProtection,Get-XonarApoProtectionSnapshot,Restore-XonarApoProtectionSnapshot,Test-XonarApoEffectsProtected

@@ -25,6 +25,7 @@ try {
         function script:Get-XonarApoProtectionSnapshot {param([switch]$AllowUnattached) [pscustomobject]@{Subkey='unit';Sddl=$script:tx.Protection}}
         function script:Restore-XonarApoEffectsProtection {param($InstallDir) $script:tx.Protection='unprotected'}
         function script:Restore-XonarApoProtectionSnapshot {param($Snapshot) $script:tx.Protection=$Snapshot[0].Sddl}
+        function script:Complete-XonarApoEffectsProtection {param($InstallDir) $script:tx.Protection='protected'}
         function script:Test-XonarApoCurrent {param($Source,$InstallRoot) return $script:tx.Current}
         function script:Install-ApoTransactional {param($SourceDll,$InstallDir,$ConfigDir,$BackupDirectory)
             if($script:tx.FailApo){throw 'Injected APO failure'}

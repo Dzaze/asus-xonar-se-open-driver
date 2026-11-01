@@ -24,6 +24,7 @@ try{
         if($builder){Start-Service AudioEndpointBuilder}
         if($running){Start-Service Audiosrv}
         if($running){(Get-Service Audiosrv).WaitForStatus('Running',[TimeSpan]::FromSeconds(15))}
+        if($Action -eq 'Protect'){Complete-XonarApoEffectsProtection -InstallDir $InstallDir}
     }
 }catch{
     $code=1;Write-Host $_.Exception.Message -ForegroundColor Red

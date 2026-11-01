@@ -73,6 +73,9 @@ public static class XonarRegistrySecurity
     {
         var original=Read(path);
         var target=new RawSecurityDescriptor(sddl);
+        var restoredOwner=new RawSecurityDescriptor(original, 0);
+        if(target.Owner != null) restoredOwner.Owner=target.Owner;
+        if(target.Group != null) restoredOwner.Group=target.Group;
         using(var take=new Privilege("SeTakeOwnershipPrivilege"))
         using(var restore=new Privilege("SeRestorePrivilege")) {
             IntPtr ownerKey; Check(RegOpenKeyEx(LocalMachine, path, 0, WriteOwner | 0x100, out ownerKey));
@@ -84,12 +87,12 @@ public static class XonarRegistrySecurity
                     if(target.DiscretionaryAcl == null) throw new InvalidOperationException("A null DACL is not permitted.");
                     // Changing owner marks OWNER RIGHTS ACEs inherit-only. Restore
                     // ownership, then reapply those ACEs using the granted handle.
-                    Check(RegSetKeySecurity(ownerKey, 1, original)); took=false;
+                    Check(RegSetKeySecurity(ownerKey, 3, Bytes(restoredOwner))); took=false;
                     uint protection=(target.ControlFlags & ControlFlags.DiscretionaryAclProtected) != 0 ? 0x80000000u : 0x20000000u;
                     Check(RegSetKeySecurity(aclKey, 4u | protection, Bytes(target)));
                 } finally { RegCloseKey(aclKey); }
             } finally {
-                try { if(took) Check(RegSetKeySecurity(ownerKey, 1, original)); }
+                try { if(took) Check(RegSetKeySecurity(ownerKey, 3, original)); }
                 finally { RegCloseKey(ownerKey); }
             }
         }

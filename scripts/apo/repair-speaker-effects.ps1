@@ -99,6 +99,7 @@ try {
         Protect-XonarApoEffects
         if($builderRunning){Start-Service AudioEndpointBuilder}
         if($audioRunning){Restart-Service Audiosrv -Force}
+        Complete-XonarApoEffectsProtection
         "LFX/GFX restaurés et relus. Pilote conservé : $($driver.DriverVersion). Sauvegarde : $BackupDirectory" | Tee-Object -FilePath (Join-Path $BackupDirectory 'result.txt')
     }catch{
         $_ | Out-String | Set-Content -LiteralPath (Join-Path $BackupDirectory 'error.txt')

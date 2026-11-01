@@ -276,6 +276,7 @@ function Install-XonarProduct {
         $config=Join-Path $ConfigRoot 'apo-efx.cfg'
         if(-not(Test-Path -LiteralPath $config)){Copy-Item -LiteralPath (Join-Path $PackageRoot 'Defaults\apo-efx.cfg') -Destination $config}
         Install-XonarProductShell $InstallRoot $package.Version
+        Complete-XonarApoEffectsProtection -InstallDir $InstallRoot
         [pscustomobject]@{Schema=1;Version=$package.Version;BaselineManifest=$m.BaselineManifest;LastManifest=(Join-Path $backup 'product-manifest.clixml')}|Export-Clixml -LiteralPath $oldStatePath -Encoding utf8
         $m.Outcome='Installed';Save-XonarProductManifest $m $backup
         Write-Host "Installation terminee. Sauvegarde : $backup"

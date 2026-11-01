@@ -16,6 +16,8 @@ try {
         function script:Assert-ApoComDestination {param($Target)}
         function script:Get-XonarApoProtectionSnapshot {param([switch]$AllowUnattached) [pscustomobject]@{Subkey='unit';Sddl=$script:tx.Protection}}
         function script:Protect-XonarApoEffects {param($InstallDir) $script:tx.Protection='protected'}
+        function script:Complete-XonarApoEffectsProtection {param($InstallDir) if($script:tx.Protection -ne 'protected'){throw 'Protection not applied'}}
+        function script:Restore-XonarApoEffectsProtection {param($InstallDir) $script:tx.Protection='unprotected'}
         function script:Restore-XonarApoProtectionSnapshot {param($Snapshot) $script:tx.Protection=$Snapshot[0].Sddl}
         function script:Read-ApoRegistryTree {param($Path)
             [pscustomobject]@{Path=$Path;Exists=$true;Values=@([pscustomobject]@{Name='';Kind='String';Value=$script:tx.Com});Children=@()}

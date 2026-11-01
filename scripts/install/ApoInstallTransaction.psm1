@@ -96,6 +96,7 @@ function Restore-ApoInstallation {
     $running=(Get-Service Audiosrv).Status -eq 'Running'
     try {
         if(-not $AudioAlreadyStopped){Stop-ApoAudio}
+        Restore-XonarApoEffectsProtection -InstallDir $manifest.InstallDir
         if($manifest.DllExisted){Copy-ApoBinary $before $target}
         elseif(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target -Force}
         Restore-ApoCom $manifest.ComTrees
@@ -202,6 +203,7 @@ function Install-ApoTransactional {
         $afterDriver=Get-XonarDriverState
         if($afterDriver.InfName -ne $driver.InfName -or $afterDriver.DriverVersion -ne $driver.DriverVersion){throw 'Le pilote a change pendant le deploiement.'}
         if($running){Start-Service Audiosrv;(Get-Service Audiosrv).WaitForStatus('Running',[TimeSpan]::FromSeconds(15))}
+        Complete-XonarApoEffectsProtection -InstallDir $InstallDir
         $manifest.Outcome='Installed'
         Save-ApoManifest $manifest $BackupDirectory
         Write-Host "Installation validee. Sauvegarde : $BackupDirectory"
