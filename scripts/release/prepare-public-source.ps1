@@ -27,11 +27,15 @@ foreach($tree in $trees){
 foreach($name in 'CMakeLists.txt','CMakePresets.json','.editorconfig','.gitattributes','LICENSE') {Copy-PublicFile (Join-Path $repo $name) $name}
 Copy-PublicFile (Join-Path $repo 'docs\backlog.md') 'docs\backlog.md'
 foreach($name in 'build.ps1','run-tests.ps1'){Copy-PublicFile (Join-Path $repo ('scripts\'+$name)) ('scripts\'+$name)}
-foreach($name in 'ApoRegistry.psm1','register-apo.ps1','unregister-apo.ps1','deploy-test-apo.ps1','test-auto-mode-live.ps1','test-control-center-live.ps1','test-product-recovery-live.ps1'){
+foreach($name in 'ApoRegistry.psm1','register-apo.ps1','unregister-apo.ps1','repair-speaker-effects.ps1','protect-speaker-effects.ps1','deploy-test-apo.ps1','test-auto-mode-live.ps1','test-control-center-live.ps1','test-product-recovery-live.ps1'){
     Copy-PublicFile (Join-Path $repo ('scripts\apo\'+$name)) ('scripts\apo\'+$name)
 }
 foreach($name in 'build-driver.ps1','sign-test.ps1'){Copy-PublicFile (Join-Path $repo ('scripts\driver\'+$name)) ('scripts\driver\'+$name)}
 foreach($file in Get-ChildItem (Join-Path $repo 'packaging\public') -Recurse -File){
     Copy-PublicFile $file.FullName $file.FullName.Substring((Join-Path $repo 'packaging\public').Length).TrimStart('\')
 }
+foreach($name in 'APO-PROTECTION.fr.md','RELEASE-0.5.0-preview.2.fr.md'){
+    Copy-PublicFile (Join-Path $repo ('docs\'+$name)) ('docs\'+$name)
+}
+Copy-PublicFile (Join-Path $repo 'scripts\install\README.md') 'scripts\install\README.md'
 Write-Host "Export public prepare : $Destination"

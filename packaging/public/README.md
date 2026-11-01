@@ -7,11 +7,17 @@ Pilote ouvert et centre de contrôle pour la **carte son ASUS Xonar SE** :
 
 ## Télécharger et installer
 
-➡️ **[Télécharger XonarSE Setup pour Windows 11 x64](https://github.com/Dzaze/asus-xonar-se-open-driver/releases/download/v0.5.0-preview.1/XonarSE-Setup-0.5.0-preview.1-x64.exe)**
+➡️ **[Télécharger XonarSE Setup pour Windows 11 x64](https://github.com/Dzaze/asus-xonar-se-open-driver/releases/download/v0.5.0-preview.2/XonarSE-Setup-0.5.0-preview.2-x64.exe)**
 
-Première version publique **0.5.0-preview.1**. Elle a été validée sur la Xonar SE du
+Version **0.5.0-preview.2**, avec le paquet pilote **0.5.0.1**. Elle a été validée sur la Xonar SE du
 développeur, sous Windows 11 build 26200. Les autres configurations restent à valider.
 Consulter les [instructions d’installation et de retour arrière](docs/INSTALLATION.fr.md).
+
+Ce correctif protège automatiquement les associations
+APO contre leur modification par les services Windows, provisionne les effets
+depuis l’INF et corrige la récupération de la page de routage, y compris quand
+Windows recrée la sortie avec un nouveau GUID. Voir les
+[détails et commandes de protection](docs/APO-PROTECTION.fr.md).
 
 **Le pilote est signé avec un certificat de test ; il n’est pas certifié Microsoft
 WHQL. Le mode test de Windows doit être activé avant l’installation.** L’assistant
@@ -42,18 +48,20 @@ Si le lecteur a déjà converti une piste 5.1 en stéréo, le format original es
 ## Périmètre validé
 
 Rendu partagé mono, stéréo et six canaux, sortie **float32 / 6 canaux / 0x60F /
-48 kHz**, avec la paire LFX/GFX historique. Les mesures précédant la publication
-comptent 43 tests du centre de contrôle, 33 cas DSP, 8 scénarios d’installation
-APO, 17 contrôles Auto et 13 contrôles manuels sur la carte.
+48 kHz**, avec la paire LFX/GFX historique. Le correctif passe 44 tests du centre
+de contrôle, 9 scénarios d’installation APO, 6 scénarios d’installation complète,
+7 scénarios de protection, 8 scénarios de récupération et 5 contrôles de préparation
+du paquet. Les validations audio précédentes comprennent 33 cas DSP, 17 contrôles
+Auto et 13 contrôles manuels sur la carte.
 
 Les chemins RAW, exclusif, offload, ASIO, S/PDIF, quadraphonie et 7.1 ne sont pas
 couverts par cette validation. La détection physique de prise n’est pas annoncée.
 Le S/PDIF reste prévu dans l’interface ; cette préversion ne promet pas toutes les
 fonctions du panneau propriétaire ASUS.
 
-Le paquet public a également été vérifié par 15 tests CTest, 5 scénarios isolés
-de l’installateur complet et un cycle réel d’installation/désinstallation sur le
-PC déjà équipé du pilote. Le remplacement initial d’un autre pilote n’a pas été
+La mise à jour 0.5.0-preview.2 a été installée, désinstallée vers l’état précédent
+puis réinstallée sur le PC déjà équipé du pilote : protection automatique, profils
+conservés et traitement audio réel vérifiés. Le remplacement initial d’un autre pilote n’a pas été
 qualifié sur une seconde machine : cette version reste une préversion.
 
 ## Code et contribution

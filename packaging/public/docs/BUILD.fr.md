@@ -32,8 +32,8 @@ rester à côté de l’exécutable ; l’application WinUI n’est pas publiée
 
 Installer MSVC x64, le SDK Windows et le WDK. Activer `XONAR_BUILD_DRIVER=ON` pour
 construire `xonarse_package`, ou `XONAR_BUILD_APO=ON` pour la DLL. Indiquer
-`XONAR_DRIVER_VERSION=0.5.0.0` lors de la génération du paquet correspondant à
-cette préversion. Utiliser un environnement isolé pour les changements noyau.
+`XONAR_DRIVER_VERSION=0.5.0.1` pour le correctif de provisionnement des effets.
+Utiliser un environnement isolé pour les changements noyau.
 
 Signer ses propres builds avec son propre certificat de développement. Aucune
 clé privée du développeur n’est incluse dans le dépôt. Les scripts de distribution
