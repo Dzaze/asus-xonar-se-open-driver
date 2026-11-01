@@ -153,7 +153,11 @@ function Test-XonarApoEffectsProtected {
         $items.Count -gt 0 -and @($items|Where-Object {-not(Test-XonarEffectsSddlProtected $_.Sddl)}).Count -eq 0
     }catch{return $false}
 }
-function Get-XonarEffectsEndpointKey { (Get-XonarSpeakerTarget).Subkey }
+function Get-XonarEffectsEndpointKey {
+    foreach($attempt in 0..20){
+        try{return (Get-XonarSpeakerTarget).Subkey}catch{if($attempt -eq 20){throw};Start-Sleep -Milliseconds 100}
+    }
+}
 function Test-XonarEffectsEndpointStable {
     param([string]$EndpointKey)
     # EndpointBuilder may publish a new GUID only after it restarts. Require a
