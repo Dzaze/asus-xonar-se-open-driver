@@ -22,6 +22,10 @@ try {
         function script:Get-XonarProductShell {[pscustomobject]@{Value=$script:tx.Shell}}
         function script:Install-XonarProductShell {param($InstallRoot,$Version) $script:tx.Shell='new-shell'}
         function script:Restore-XonarProductShell {param($State) $script:tx.Shell=$State.Value}
+        function script:Get-XonarApoProtectionSnapshot {param([switch]$AllowUnattached) [pscustomobject]@{Subkey='unit';Sddl=$script:tx.Protection}}
+        function script:Restore-XonarApoEffectsProtection {param($InstallDir) $script:tx.Protection='unprotected'}
+        function script:Restore-XonarApoProtectionSnapshot {param($Snapshot) $script:tx.Protection=$Snapshot[0].Sddl}
+        function script:Complete-XonarApoEffectsProtection {param($InstallDir) $script:tx.Protection='protected'}
         function script:Test-XonarApoCurrent {param($Source,$InstallRoot) return $script:tx.Current}
         function script:Install-ApoTransactional {param($SourceDll,$InstallDir,$ConfigDir,$BackupDirectory)
             if($script:tx.FailApo){throw 'Injected APO failure'}
@@ -50,36 +54,41 @@ try {
             Microsoft.PowerShell.Management\Copy-Item @PSBoundParameters
         }
         $passed=0
-        foreach($case in 'ExistingNative','NewNative','ApoFailure','AppCopyFailure','TamperedPayload'){
+        foreach($case in 'ExistingNative','NativeInfUpdate','NewNative','ApoFailure','AppCopyFailure','TamperedPayload'){
             $folder=Join-Path $testRoot $case;$package=Join-Path $folder 'Package';$install=Join-Path $folder 'Install';$config=Join-Path $folder 'Config'
             $directories=@('App','Scripts','bin','Driver','Certificates','Defaults','Licenses','Prerequisites')
             foreach($name in $directories){New-Item -ItemType Directory -Path (Join-Path $package $name) -Force|Out-Null;Set-Content -LiteralPath (Join-Path $package ($name+'\marker.txt')) -Value 'package'}
             New-Item -ItemType Directory -Path (Join-Path $install 'App'),$config -Force|Out-Null
             Set-Content -LiteralPath (Join-Path $install 'App\previous.txt') -Value 'previous app'
             Set-Content -LiteralPath (Join-Path $config 'apo-efx.cfg') -Value 'personal settings'
-            foreach($name in 'Driver\xonarse.sys','Driver\xonarse.cat','Driver\xonarse.inf','bin\XonarApo.dll','Uninstall-XonarSE.exe','README-INSTALLATION.md','Certificates\XonarSeOpenDriver-TEST.cer','Defaults\apo-efx.cfg'){
+            foreach($name in 'Driver\xonarse.sys','Driver\xonarse.cat','Driver\xonarse.inf','bin\XonarApo.dll','Uninstall-XonarSE.exe','README-INSTALLATION.md','APO-PROTECTION.fr.md','Certificates\XonarSeOpenDriver-TEST.cer','Defaults\apo-efx.cfg'){
                 Set-Content -LiteralPath (Join-Path $package $name) -Value 'new package'
             }
             $oldDriver=[pscustomobject]@{InstanceId='unit-device';InfName='oem111.inf';Version='old';Service='previous';RuntimePath=$null}
             $newDriver=[pscustomobject]@{InstanceId='unit-device';InfName='oem222.inf';Version='0.5.0.0';Service='xonarse';RuntimePath=(Join-Path $package 'Driver\xonarse.sys')}
             if($case -eq 'ExistingNative'){$oldDriver=$newDriver}
-            $script:tx=@{Driver=$oldDriver;OldDriver=$oldDriver;NewDriver=$newDriver;Current=$case -eq 'ExistingNative';Apo='previous-apo';Shell='previous-shell';FailApo=$case -eq 'ApoFailure';FailCopy=$case -eq 'AppCopyFailure';Root=$install}
+            if($case -eq 'NativeInfUpdate'){
+                $oldDriver=[pscustomobject]@{InstanceId='unit-device';InfName='oem111.inf';Version='0.4.0.0';Service='xonarse';RuntimePath=$newDriver.RuntimePath}
+            }
+            $script:tx=@{Driver=$oldDriver;OldDriver=$oldDriver;NewDriver=$newDriver;Current=$case -eq 'ExistingNative';Protection='previous-permissions';Apo='previous-apo';Shell='previous-shell';FailApo=$case -eq 'ApoFailure';FailCopy=$case -eq 'AppCopyFailure';Root=$install}
             $entries=@(Get-ChildItem -LiteralPath $package -Recurse -File|ForEach-Object {[pscustomobject]@{Path=$_.FullName.Substring($package.Length).TrimStart('\');Sha256=(Get-FileHash -LiteralPath $_.FullName).Hash}})
             [pscustomobject]@{Schema=1;HardwareId=$script:ProductHardwareId;SignerThumbprint=$script:ProductSigner;Version='test';DriverVersion='0.5.0.0';Files=$entries}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $package 'manifest.json')
             $hash=(Get-FileHash -LiteralPath (Join-Path $package 'manifest.json')).Hash
             if($case -eq 'TamperedPayload'){Set-Content -LiteralPath (Join-Path $package 'Driver\xonarse.sys') -Value 'tampered'}
             $failure=$null;$result=$null
             try{$result=Install-XonarProduct -PackageRoot $package -ManifestHash $hash -InstallRoot $install -ConfigRoot $config}catch{$failure=$_}
-            if($case -in 'ExistingNative','NewNative'){
+            if($case -in 'ExistingNative','NativeInfUpdate','NewNative'){
                 if($failure){throw $failure}
                 if(-not(Test-Path -LiteralPath (Join-Path $install 'App\marker.txt'))){throw 'New app missing'}
                 if($case -eq 'ExistingNative' -and ($result.DriverChanged -or $result.ApoChanged)){throw 'Existing native stack changed'}
+                if($case -eq 'NativeInfUpdate' -and -not $result.DriverChanged){throw 'New INF version skipped because SYS bytes are unchanged'}
                 Restore-XonarProduct -BackupDirectory $result.BackupDirectory
             }elseif(-not $failure){throw "Expected failure missing : $case"}
             if(-not(Test-Path -LiteralPath (Join-Path $install 'App\previous.txt'))){throw "Previous app lost : $case"}
             if(Test-Path -LiteralPath (Join-Path $install 'App\partial.txt')){throw "Partial files left : $case"}
             if((Get-Content -LiteralPath (Join-Path $config 'apo-efx.cfg') -Raw).Trim() -ne 'personal settings'){throw 'Personal config changed'}
             if($script:tx.Driver.InfName -ne $oldDriver.InfName -or $script:tx.Apo -ne 'previous-apo' -or $script:tx.Shell -ne 'previous-shell'){throw "Native/shell state not restored : $case"}
+            if($script:tx.Protection -ne 'previous-permissions'){throw "Effects permissions not restored : $case"}
             ++$passed;Write-Host "PASS : $case"
         }
         Write-Host "$passed product installer scenarios passed."

@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: Apache-2.0
 [CmdletBinding()]
-param([string]$Version='0.5.0-preview.1',[string]$DriverPackage,[string]$ApoDll,[string]$PublishedApp,[string]$SourceCommit='unpublished',[string]$OutputDirectory,[string]$RuntimeRedistributable)
+param([string]$Version='0.5.0-preview.2',[string]$DriverPackage,[string]$ApoDll,[string]$PublishedApp,[string]$SourceCommit='unpublished',[string]$OutputDirectory,[string]$RuntimeRedistributable)
 $ErrorActionPreference='Stop';Set-StrictMode -Version Latest
+Import-Module (Join-Path $PSScriptRoot 'ReleaseValidation.psm1') -Force
 $repo=(Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $output=if($OutputDirectory){[IO.Path]::GetFullPath($OutputDirectory)}else{Join-Path $repo ('build\releases\'+$Version)}
 $package=Join-Path $output 'package'
@@ -18,8 +19,12 @@ foreach($file in $ApoDll,(Join-Path $DriverPackage 'xonarse.sys'),(Join-Path $Dr
     $sig=Get-AuthenticodeSignature -LiteralPath $file
     if($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Thumbprint -ne $thumb){throw "Binaire non signe en test par le projet : $file"}
 }
+$driverInf=[IO.File]::ReadAllText((Join-Path $DriverPackage 'xonarse.inf'))
+$packagedDriverVersion=Get-XonarReleaseDriverVersion $driverInf
 & $signtool verify /pa /c (Join-Path $DriverPackage 'xonarse.cat') (Join-Path $DriverPackage 'xonarse.sys')
 if($LASTEXITCODE -ne 0){throw 'Catalogue et pilote non conformes.'}
+& $signtool verify /pa /c (Join-Path $DriverPackage 'xonarse.cat') (Join-Path $DriverPackage 'xonarse.inf')
+if($LASTEXITCODE -ne 0){throw 'Le catalogue signe ne couvre pas l INF fourni.'}
 New-Item -ItemType Directory -Path $output,$package -Force|Out-Null
 function Copy-ReleaseFile([string]$Source,[string]$Relative){
     $target=Join-Path $package $Relative;New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force|Out-Null
@@ -38,16 +43,17 @@ Copy-ReleaseFile $ApoDll 'bin\XonarApo.dll'
 New-Item -ItemType Directory -Path (Join-Path $package 'Certificates') -Force|Out-Null
 Export-Certificate -Cert $signer -FilePath (Join-Path $package 'Certificates\XonarSeOpenDriver-TEST.cer') -Force|Out-Null
 foreach($file in Get-ChildItem (Join-Path $repo 'scripts\install') -File){
-    if($file.Extension -notin '.ps1','.psm1','.cmd'){continue}
+    if($file.Extension -notin '.ps1','.psm1','.cmd','.cs'){continue}
     Copy-ReleaseFile $file.FullName ('Scripts\install\'+$file.Name)
 }
-foreach($name in 'ApoRegistry.psm1','register-apo.ps1','unregister-apo.ps1'){Copy-ReleaseFile (Join-Path $repo ('scripts\apo\'+$name)) ('Scripts\apo\'+$name)}
+foreach($name in 'ApoRegistry.psm1','register-apo.ps1','unregister-apo.ps1','repair-speaker-effects.ps1','protect-speaker-effects.ps1'){Copy-ReleaseFile (Join-Path $repo ('scripts\apo\'+$name)) ('Scripts\apo\'+$name)}
 # Windows PowerShell 5.1 interprete correctement le texte UTF-8 avec BOM.
 foreach($file in Get-ChildItem -LiteralPath (Join-Path $package 'Scripts') -Recurse -File|Where-Object {$_.Extension -in '.ps1','.psm1'}){
     $text=[IO.File]::ReadAllText($file.FullName);[IO.File]::WriteAllText($file.FullName,$text,[Text.UTF8Encoding]::new($true))
 }
 Copy-ReleaseFile (Join-Path $repo 'packaging\defaults\apo-efx.cfg') 'Defaults\apo-efx.cfg'
 Copy-ReleaseFile (Join-Path $repo 'packaging\public\docs\INSTALLATION.fr.md') 'README-INSTALLATION.md'
+Copy-ReleaseFile (Join-Path $repo 'docs\APO-PROTECTION.fr.md') 'APO-PROTECTION.fr.md'
 Copy-ReleaseFile (Join-Path $repo 'LICENSE') 'Licenses\XonarSE-Apache-2.0.txt'
 $nuget=Join-Path $env:USERPROFILE '.nuget\packages'
 Copy-ReleaseFile (Join-Path $nuget 'microsoft.windowsappsdk\1.8.260921001\license.txt') 'Licenses\WindowsAppSDK-license.txt'
@@ -87,7 +93,7 @@ if($LASTEXITCODE -ne 0){throw 'Signature desinstallation echouee.'}
 $files=@(Get-ChildItem -LiteralPath $package -Recurse -File|Sort-Object FullName|ForEach-Object {
     [pscustomobject]@{Path=$_.FullName.Substring($package.Length).TrimStart('\').Replace('\','/');Sha256=(Get-FileHash -LiteralPath $_.FullName).Hash}
 })
-$metadata=[ordered]@{Schema=1;Version=$Version;DriverVersion='0.5.0.0';HardwareId='USB\VID_0B05&PID_189D&MI_00';SignerThumbprint=$thumb;SourceCommit=$SourceCommit;Files=$files}
+$metadata=[ordered]@{Schema=1;Version=$Version;DriverVersion=$packagedDriverVersion;HardwareId='USB\VID_0B05&PID_189D&MI_00';SignerThumbprint=$thumb;SourceCommit=$SourceCommit;Files=$files}
 [IO.File]::WriteAllText((Join-Path $package 'manifest.json'),($metadata|ConvertTo-Json -Depth 6),[Text.UTF8Encoding]::new($false))
 $hash=(Get-FileHash -LiteralPath (Join-Path $package 'manifest.json')).Hash
 Write-BuildInfo $hash

@@ -63,8 +63,12 @@ function Restore-ApoSnapshot {
     param([Parameter(Mandatory)][string]$Path)
     $snapshot=Import-Clixml -LiteralPath $Path
     if($snapshot.Version -ne 1){throw 'Version de sauvegarde inconnue.'}
-    $target=Get-XonarSpeakerTarget -EndpointGuid $snapshot.EndpointGuid
-    if($target.Subkey -ne $snapshot.Subkey -or $target.Devnode -ne $snapshot.Devnode){throw 'La sauvegarde ne correspond pas au matériel actuel.'}
+    $savedGuid=([guid]$snapshot.EndpointGuid).ToString('B')
+    if($snapshot.Subkey -ne "$script:RenderSubkey\$savedGuid\FxProperties"){throw 'Chemin de sauvegarde incoherent.'}
+    try{$target=Get-XonarSpeakerTarget -EndpointGuid $snapshot.EndpointGuid}
+    catch{$target=Get-XonarSpeakerTarget}
+    if($target.Devnode -ne $snapshot.Devnode){throw 'La sauvegarde ne correspond pas au matériel actuel.'}
+    if($target.EndpointGuid -ne $snapshot.EndpointGuid){Write-Host "Endpoint reconstruit : restauration $($snapshot.EndpointGuid) vers $($target.EndpointGuid), meme materiel."}
     $key=Open-ApoEffectsKey -Subkey $target.Subkey -Writable
     try {foreach($value in $snapshot.Values){Set-ApoValue -Key $key -Value $value};$key.Flush()}finally{$key.Dispose()}
     Write-Host "Sauvegarde restaurée et relue : $Path"

@@ -14,7 +14,7 @@ param(
     [string]$ConfigDir='C:\ProgramData\XonarSE',
     [string]$BackupDirectory,
     [string]$TrustedSignerThumbprint='FF68A5C11C614F5E45AD64594D5A978BD9E5D321',
-    [ValidateSet('None','AfterCopy','AfterRegistration','AfterAttachment')][string]$FailurePoint='None',
+    [ValidateSet('None','AfterCopy','AfterRegistration','AfterAttachment','AfterProtection')][string]$FailurePoint='None',
     [switch]$WhatIf,[switch]$Pause
 )
 $ErrorActionPreference='Stop';Set-StrictMode -Version Latest

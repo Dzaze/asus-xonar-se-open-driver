@@ -8,6 +8,8 @@ public static class InstallerLauncher
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         for(int i = 0; i < 9 && directory is not null; ++i, directory = directory.Parent) {
+            string repair = Path.Combine(directory.FullName, "scripts", "apo", "repair-speaker-effects.ps1");
+            if(File.Exists(repair) && File.Exists(@"C:\Program Files\XonarSE\XonarApo.dll")) return repair;
             string script = Path.Combine(directory.FullName, "scripts", "install", "install-xonar-apo.ps1");
             if(File.Exists(script)) return script;
         }

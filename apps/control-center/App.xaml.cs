@@ -40,10 +40,11 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        bool background = Array.Exists(Environment.GetCommandLineArgs(), a => a == "--background");
         _instanceMutex = new System.Threading.Mutex(false, @"Local\XonarSE.ControlCenter", out bool firstInstance);
         if(!firstInstance) {
             var window = FindWindow(null, "Centre de contrôle Xonar SE");
-            if(window != IntPtr.Zero) { ShowWindow(window, 9);SetForegroundWindow(window); }
+            if(!background && window != IntPtr.Zero) { ShowWindow(window, 9);SetForegroundWindow(window); }
             _instanceMutex.Dispose();_instanceMutex = null;Exit();return;
         }
         // Matériel résolu par identité USB ; état observé dans audiodg et profil persistant.
@@ -53,6 +54,7 @@ public partial class App : Application
         _window.Activate();
 
         CreateTrayIcon();
+        if(background) _window.AppWindow.Hide();
     }
 
     [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]

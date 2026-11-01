@@ -62,6 +62,12 @@ public sealed class AppShellViewModel
 
     public string? SelectedEndpointKey { get; private set; }
 
+    public event Action? CapabilitiesChanged;
+
+    public bool CanSelectSourcePolicy(SourcePolicy policy) => Client is not LiveApoBroker ||
+        (CanWrite && policy != SourcePolicy.ForceStereoFrontPair &&
+         (policy != SourcePolicy.AutoDeclaredLayout || Capabilities?.Features.AutoDeclaredLayout == true));
+
     public async Task InitializeAsync()
     {
         try
@@ -80,6 +86,10 @@ public sealed class AppShellViewModel
         catch (Exception)
         {
             LastMessage = ErrorMessages.NoCardNoAgent;
+        }
+        finally
+        {
+            CapabilitiesChanged?.Invoke();
         }
     }
 }

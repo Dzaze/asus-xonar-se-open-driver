@@ -60,6 +60,7 @@ $ConfigDir=[IO.Path]::GetFullPath($ConfigDir)
 
 $here = $PSScriptRoot
 Import-Module (Join-Path $here 'XonarApoCommon.psm1') -Force
+Import-Module (Join-Path $here 'ApoEffectsProtection.psm1') -Force
 
 # Auto-elevation (sauf en essai a blanc, qui ne fait que des lectures).
 if (-not (Invoke-XonarSelfElevation -ScriptPath $PSCommandPath -BoundParameters $PSBoundParameters -SkipIfNotAdmin:$WhatIf)) {
@@ -78,6 +79,7 @@ $exitCode = 0
 try {
     Write-XonarLog ("Desinstallation APO Xonar SE  (essai a blanc = {0}, RemoveConfig = {1})" -f $WhatIf.IsPresent, $RemoveConfig.IsPresent)
     Write-XonarLog "Journal : $logFile"
+    Restore-XonarApoEffectsProtection -InstallDir $InstallDir -Preview:$WhatIf
 
     # --- 2) Resolution de l'endpoint (non bloquante) ---------------------------------
     $target = $null

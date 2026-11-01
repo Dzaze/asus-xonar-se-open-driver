@@ -120,10 +120,17 @@ HKR,,CLSID,,%Proxy.CLSID%
 HKR,,FriendlyName,,%XonarSe.WaveSpeaker.szPname%
 
 [XonarSe.I.TopologySpeaker]
-AddReg=XonarSe.I.TopologySpeaker.AddReg, XonarSe.EP.Speaker.AddReg
+AddReg=XonarSe.I.TopologySpeaker.AddReg, XonarSe.EP.Speaker.AddReg, XonarSe.FX.Speaker.AddReg
 [XonarSe.I.TopologySpeaker.AddReg]
 HKR,,CLSID,,%Proxy.CLSID%
 HKR,,FriendlyName,,%XonarSe.TopologySpeaker.szPname%
+
+; Déclaration persistante : AudioEndpointBuilder reprovisionne les effets lorsque
+; l'endpoint est reconstruit. Les deux classes sont livrées par le paquet produit.
+[XonarSe.FX.Speaker.AddReg]
+HKR,"FX\0","{D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},0",,"{00000000-0000-0000-0000-000000000000}"
+HKR,"FX\0","{D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},1",,"{C243A8CB-D535-4BA0-BCC5-CC4338833E7A}"
+HKR,"FX\0","{D04E05A6-594B-4FB6-A80D-01AF5EED7D1D},2",,"{D2FBC737-00C3-4482-B3DD-02D92C06003E}"
 
 ; Format par defaut du moteur audio : 6 canaux, 24/24 bits, 48 kHz, masque 0x60F
 ; (FL FR FC LFE SL SR). Corrige le retour silencieux en stereo constate avec usbaudio2.

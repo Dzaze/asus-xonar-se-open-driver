@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 Set-StrictMode -Version Latest
 Import-Module (Join-Path $PSScriptRoot '..\apo\ApoRegistry.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'ApoEffectsProtection.psm1') -Force
 
 function Get-ApoComRoots {
     foreach($id in '{C243A8CB-D535-4BA0-BCC5-CC4338833E7A}','{D2FBC737-00C3-4482-B3DD-02D92C06003E}') {
@@ -95,11 +96,15 @@ function Restore-ApoInstallation {
     $running=(Get-Service Audiosrv).Status -eq 'Running'
     try {
         if(-not $AudioAlreadyStopped){Stop-ApoAudio}
+        Restore-XonarApoEffectsProtection -InstallDir $manifest.InstallDir
         if($manifest.DllExisted){Copy-ApoBinary $before $target}
         elseif(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target -Force}
         Restore-ApoCom $manifest.ComTrees
         foreach($snapshot in @(Get-ChildItem -LiteralPath $BackupDirectory -Filter 'fx-*.clixml')){
             Restore-ApoSnapshot -Path $snapshot.FullName
+        }
+        if($manifest.PSObject.Properties.Name -contains 'ProtectionBefore'){
+            Restore-XonarApoProtectionSnapshot -Snapshot @($manifest.ProtectionBefore)
         }
         foreach($item in $manifest.Acls){
             if($item.Sddl -and (Test-Path -LiteralPath $item.Path)){
@@ -121,7 +126,7 @@ function Install-ApoTransactional {
         [string]$ConfigDir='C:\ProgramData\XonarSE',
         [string]$BackupDirectory,
         [string]$TrustedSignerThumbprint='FF68A5C11C614F5E45AD64594D5A978BD9E5D321',
-        [ValidateSet('None','AfterCopy','AfterRegistration','AfterAttachment')][string]$FailurePoint='None',
+        [ValidateSet('None','AfterCopy','AfterRegistration','AfterAttachment','AfterProtection')][string]$FailurePoint='None',
         [switch]$Preview
     )
     Assert-ApoDestination $InstallDir $ConfigDir
@@ -159,7 +164,8 @@ function Install-ApoTransactional {
         Version=2;Target=$target;InstallDir=$InstallDir;ConfigDir=$ConfigDir;DllExisted=$existed;
         BeforeHash=if($existed){(Get-FileHash -LiteralPath $target).Hash}else{$null};
         SourceHash=$sourceHash;ComTrees=@(foreach($root in Get-ApoComRoots){Read-ApoRegistryTree $root});
-        Acls=$acls;EndpointGuid=$hardware.EndpointGuid;Devnode=$hardware.Devnode;Outcome='Prepared'
+        Acls=$acls;EndpointGuid=$hardware.EndpointGuid;Devnode=$hardware.Devnode;Outcome='Prepared';
+        ProtectionBefore=@(Get-XonarApoProtectionSnapshot -AllowUnattached)
     }
     Save-ApoManifest $manifest $BackupDirectory
     $running=(Get-Service Audiosrv).Status -eq 'Running'
@@ -188,9 +194,16 @@ function Install-ApoTransactional {
         }
         Invoke-ApoAttachment -BackupDirectory $BackupDirectory
         if($FailurePoint -eq 'AfterAttachment'){throw 'Panne injectee apres rattachement.'}
+        $builderRunning=(Get-Service AudioEndpointBuilder).Status -eq 'Running'
+        try{
+            if($builderRunning){Stop-Service AudioEndpointBuilder -Force}
+            Protect-XonarApoEffects -InstallDir $InstallDir
+            if($FailurePoint -eq 'AfterProtection'){throw 'Panne injectee apres protection.'}
+        }finally{if($builderRunning){Start-Service AudioEndpointBuilder}}
         $afterDriver=Get-XonarDriverState
         if($afterDriver.InfName -ne $driver.InfName -or $afterDriver.DriverVersion -ne $driver.DriverVersion){throw 'Le pilote a change pendant le deploiement.'}
         if($running){Start-Service Audiosrv;(Get-Service Audiosrv).WaitForStatus('Running',[TimeSpan]::FromSeconds(15))}
+        Complete-XonarApoEffectsProtection -InstallDir $InstallDir
         $manifest.Outcome='Installed'
         Save-ApoManifest $manifest $BackupDirectory
         Write-Host "Installation validee. Sauvegarde : $BackupDirectory"
