@@ -53,6 +53,7 @@ foreach($file in Get-ChildItem -LiteralPath (Join-Path $package 'Scripts') -Recu
 }
 Copy-ReleaseFile (Join-Path $repo 'packaging\defaults\apo-efx.cfg') 'Defaults\apo-efx.cfg'
 Copy-ReleaseFile (Join-Path $repo 'packaging\public\docs\INSTALLATION.fr.md') 'README-INSTALLATION.md'
+Copy-ReleaseFile (Join-Path $repo 'docs\APO-PROTECTION.fr.md') 'APO-PROTECTION.fr.md'
 Copy-ReleaseFile (Join-Path $repo 'LICENSE') 'Licenses\XonarSE-Apache-2.0.txt'
 $nuget=Join-Path $env:USERPROFILE '.nuget\packages'
 Copy-ReleaseFile (Join-Path $nuget 'microsoft.windowsappsdk\1.8.260921001\license.txt') 'Licenses\WindowsAppSDK-license.txt'

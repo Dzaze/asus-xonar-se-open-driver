@@ -218,7 +218,7 @@ function Install-XonarProduct {
     New-Item -ItemType Directory -Path $backup -Force|Out-Null
     $oldStatePath=Join-Path $InstallRoot 'ProductState.clixml'
     $oldState=if(Test-Path -LiteralPath $oldStatePath){Import-Clixml -LiteralPath $oldStatePath}else{$null}
-    $topFiles=@(foreach($name in 'manifest.json','Uninstall-XonarSE.exe','README-INSTALLATION.md','ProductState.clixml'){
+    $topFiles=@(foreach($name in 'manifest.json','Uninstall-XonarSE.exe','README-INSTALLATION.md','APO-PROTECTION.fr.md','ProductState.clixml'){
         $path=Join-Path $InstallRoot $name;$exists=Test-Path -LiteralPath $path
         if($exists){Copy-Item -LiteralPath $path -Destination (Join-Path $backup $name)}
         [pscustomobject]@{Name=$name;Existed=$exists;Backup=$name}
@@ -271,7 +271,7 @@ function Install-XonarProduct {
             $m.ReplacedDirectories+=,$name;Save-XonarProductManifest $m $backup
             Copy-Item -LiteralPath $source -Destination $target -Recurse -Force
         }
-        foreach($name in 'manifest.json','Uninstall-XonarSE.exe','README-INSTALLATION.md'){Copy-Item -LiteralPath (Join-Path $PackageRoot $name) -Destination (Join-Path $InstallRoot $name) -Force}
+        foreach($name in 'manifest.json','Uninstall-XonarSE.exe','README-INSTALLATION.md','APO-PROTECTION.fr.md'){Copy-Item -LiteralPath (Join-Path $PackageRoot $name) -Destination (Join-Path $InstallRoot $name) -Force}
         New-Item -ItemType Directory -Path $ConfigRoot -Force|Out-Null
         $config=Join-Path $ConfigRoot 'apo-efx.cfg'
         if(-not(Test-Path -LiteralPath $config)){Copy-Item -LiteralPath (Join-Path $PackageRoot 'Defaults\apo-efx.cfg') -Destination $config}

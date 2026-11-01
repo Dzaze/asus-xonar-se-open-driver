@@ -60,7 +60,7 @@ try {
             New-Item -ItemType Directory -Path (Join-Path $install 'App'),$config -Force|Out-Null
             Set-Content -LiteralPath (Join-Path $install 'App\previous.txt') -Value 'previous app'
             Set-Content -LiteralPath (Join-Path $config 'apo-efx.cfg') -Value 'personal settings'
-            foreach($name in 'Driver\xonarse.sys','Driver\xonarse.cat','Driver\xonarse.inf','bin\XonarApo.dll','Uninstall-XonarSE.exe','README-INSTALLATION.md','Certificates\XonarSeOpenDriver-TEST.cer','Defaults\apo-efx.cfg'){
+            foreach($name in 'Driver\xonarse.sys','Driver\xonarse.cat','Driver\xonarse.inf','bin\XonarApo.dll','Uninstall-XonarSE.exe','README-INSTALLATION.md','APO-PROTECTION.fr.md','Certificates\XonarSeOpenDriver-TEST.cer','Defaults\apo-efx.cfg'){
                 Set-Content -LiteralPath (Join-Path $package $name) -Value 'new package'
             }
             $oldDriver=[pscustomobject]@{InstanceId='unit-device';InfName='oem111.inf';Version='old';Service='previous';RuntimePath=$null}
