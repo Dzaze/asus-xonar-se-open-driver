@@ -174,6 +174,9 @@ function Restore-XonarProduct {
     Restore-XonarProductDriver $m
     if($m.PSObject.Properties.Name -contains 'EffectsProtectionBefore'){
         Restore-XonarApoProtectionSnapshot -Snapshot @($m.EffectsProtectionBefore)
+        if(Test-XonarApoProtectionSnapshotProtected @($m.EffectsProtectionBefore)){
+            Complete-XonarApoEffectsProtection -InstallDir $m.InstallRoot
+        }
     }
     foreach($name in @($m.ReplacedDirectories)){
         Remove-XonarProductDirectory -Path (Join-Path $m.InstallRoot $name) -InstallRoot $m.InstallRoot

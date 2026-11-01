@@ -28,6 +28,7 @@ try{
         Write-Host 'PASS : preview without mutation'
         Protect-XonarApoEffects -InstallDir $install
         if(-not(Test-XonarApoEffectsProtected) -or $script:writes -ne 3){throw 'Protection missing'}
+        if(-not(Test-XonarApoProtectionSnapshotProtected @(Get-XonarApoProtectionSnapshot))){throw 'Protected snapshot not recognized for rollback'}
         $state=Join-Path $install 'State\apo-effects-protection.clixml'
         $hash=(Get-FileHash -LiteralPath $state).Hash
         Protect-XonarApoEffects -InstallDir $install
@@ -41,6 +42,7 @@ try{
         }
         Write-Host 'PASS : explicit write/delete/change-permissions denial for SYSTEM and services'
         Restore-XonarApoEffectsProtection -InstallDir $install
+        if(Test-XonarApoProtectionSnapshotProtected @(Get-XonarApoProtectionSnapshot)){throw 'Unprotected snapshot incorrectly recognized as protected'}
         foreach($value in $script:descriptors.Values){if($value -ne $original){throw 'Original ACL not restored'}}
         Write-Host 'PASS : exact original permissions restored'
         $script:failAt=$script:writes+2

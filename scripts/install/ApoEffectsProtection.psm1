@@ -153,6 +153,10 @@ function Test-XonarApoEffectsProtected {
         $items.Count -gt 0 -and @($items|Where-Object {-not(Test-XonarEffectsSddlProtected $_.Sddl)}).Count -eq 0
     }catch{return $false}
 }
+function Test-XonarApoProtectionSnapshotProtected {
+    param([object[]]$Snapshot)
+    try{return $Snapshot.Count -gt 0 -and @($Snapshot|Where-Object {-not(Test-XonarEffectsSddlProtected $_.Sddl)}).Count -eq 0}catch{return $false}
+}
 function Get-XonarEffectsEndpointKey {
     foreach($attempt in 0..20){
         try{return (Get-XonarSpeakerTarget).Subkey}catch{if($attempt -eq 20){throw};Start-Sleep -Milliseconds 100}
@@ -191,4 +195,4 @@ function Complete-XonarApoEffectsProtection {
         if($audioRunning){Start-Service Audiosrv}
     }
 }
-Export-ModuleMember -Function Protect-XonarApoEffects,Complete-XonarApoEffectsProtection,Restore-XonarApoEffectsProtection,Get-XonarApoProtectionSnapshot,Restore-XonarApoProtectionSnapshot,Test-XonarApoEffectsProtected
+Export-ModuleMember -Function Protect-XonarApoEffects,Complete-XonarApoEffectsProtection,Restore-XonarApoEffectsProtection,Get-XonarApoProtectionSnapshot,Restore-XonarApoProtectionSnapshot,Test-XonarApoProtectionSnapshotProtected,Test-XonarApoEffectsProtected
