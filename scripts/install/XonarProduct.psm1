@@ -2,6 +2,7 @@
 Set-StrictMode -Version Latest
 Import-Module (Join-Path $PSScriptRoot '..\apo\ApoRegistry.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot 'ApoInstallTransaction.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'ApoEffectsProtection.psm1') -Force
 $script:ProductHardwareId='USB\VID_0B05&PID_189D&MI_00'
 $script:ProductSigner='FF68A5C11C614F5E45AD64594D5A978BD9E5D321'
 function Initialize-XonarProductApi {
@@ -100,7 +101,7 @@ function Test-XonarApoCurrent {
         try {
             $sfx=$key.GetValue('{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},1');$efx=$key.GetValue('{d04e05a6-594b-4fb6-a80d-01af5eed7d1d},2')
             $com=Get-Item -LiteralPath 'Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{D2FBC737-00C3-4482-B3DD-02D92C06003E}\InprocServer32'
-            return $sfx -eq '{C243A8CB-D535-4BA0-BCC5-CC4338833E7A}' -and $efx -eq '{D2FBC737-00C3-4482-B3DD-02D92C06003E}' -and $com.GetValue('') -eq $target
+            return $sfx -eq '{C243A8CB-D535-4BA0-BCC5-CC4338833E7A}' -and $efx -eq '{D2FBC737-00C3-4482-B3DD-02D92C06003E}' -and $com.GetValue('') -eq $target -and (Test-XonarApoEffectsProtected)
         }finally{$key.Dispose()}
     }catch{return $false}
 }
@@ -168,8 +169,12 @@ function Restore-XonarProduct {
     $m=Import-Clixml -LiteralPath (Join-Path $BackupDirectory 'product-manifest.clixml')
     if($m.Schema -ne 1){throw 'Version de sauvegarde produit inconnue.'}
     Assert-XonarProductPaths $m.InstallRoot $m.ConfigRoot
+    Restore-XonarApoEffectsProtection -InstallDir $m.InstallRoot
     if($m.ApoBackup -and (Test-Path -LiteralPath (Join-Path $m.ApoBackup 'install-manifest.clixml'))){Restore-ApoInstallation -BackupDirectory $m.ApoBackup}
     Restore-XonarProductDriver $m
+    if($m.PSObject.Properties.Name -contains 'EffectsProtectionBefore'){
+        Restore-XonarApoProtectionSnapshot -Snapshot @($m.EffectsProtectionBefore)
+    }
     foreach($name in @($m.ReplacedDirectories)){
         Remove-XonarProductDirectory -Path (Join-Path $m.InstallRoot $name) -InstallRoot $m.InstallRoot
         $previous=Join-Path $BackupDirectory ('Files\'+$name)
@@ -218,7 +223,9 @@ function Install-XonarProduct {
         if($exists){Copy-Item -LiteralPath $path -Destination (Join-Path $backup $name)}
         [pscustomobject]@{Name=$name;Existed=$exists;Backup=$name}
     })
-    $m=[pscustomobject]@{Schema=1;Version=$package.Version;InstallRoot=$InstallRoot;ConfigRoot=$ConfigRoot;OriginalDriver=$original;DriverExport=$null;
+    $protectionBefore=@()
+    try{$protectionBefore=@(Get-XonarApoProtectionSnapshot -AllowUnattached)}catch{Write-Verbose 'Aucune ancienne association Xonar a sauvegarder.'}
+    $m=[pscustomobject]@{Schema=1;Version=$package.Version;InstallRoot=$InstallRoot;ConfigRoot=$ConfigRoot;OriginalDriver=$original;DriverExport=$null;EffectsProtectionBefore=$protectionBefore;
         DriverChanged=$false;InstalledInf=$null;ApoBackup=$null;AddedCertificateStores=@();ReplacedDirectories=@();TopFiles=$topFiles;Outcome='Prepared';NeedsRestart=$false;
         BaselineManifest=if($oldState){$oldState.BaselineManifest}else{Join-Path $backup 'product-manifest.clixml'};Shell=(Get-XonarProductShell)}
     Save-XonarProductManifest $m $backup
@@ -234,6 +241,7 @@ function Install-XonarProduct {
         $redist=Join-Path $PackageRoot 'Prerequisites\vc_redist.x64.exe'
         if(Install-XonarProductRuntime $redist){$m.NeedsRestart=$true}
         if($driverNeeded){
+            Restore-XonarApoEffectsProtection -InstallDir $InstallRoot
             if($original.InfName -match '^oem\d+\.inf$'){
                 $export=Join-Path $backup 'PreviousDriver';New-Item -ItemType Directory -Path $export|Out-Null
                 [void](Invoke-XonarPnpUtil -Arguments @('/export-driver',$original.InfName,$export));$m.DriverExport=$export

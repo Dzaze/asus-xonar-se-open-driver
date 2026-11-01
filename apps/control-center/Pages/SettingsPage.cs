@@ -89,14 +89,24 @@ public sealed class SettingsPage : Microsoft.UI.Xaml.Controls.UserControl
     {
         var autostart = new ToggleSwitch { OnContent = null, OffContent = null };
         autostart.IsOn = Services.StartupManager.IsEnabled();
-        autostart.Toggled += (_, _) => Services.StartupManager.SetEnabled(autostart.IsOn);
+        bool updating = false;
+        var startupStatus = new TextBlock { Style = S("CockpitCaption"), TextWrapping = TextWrapping.Wrap };
+        autostart.Toggled += (_, _) => {
+            if(updating) return;
+            if(Services.StartupManager.SetEnabled(autostart.IsOn)) { startupStatus.Text = ""; return; }
+            updating = true;
+            autostart.IsOn = Services.StartupManager.IsEnabled();
+            updating = false;
+            startupStatus.Text = "Impossible de modifier le démarrage automatique de cette session.";
+        };
         var formatRepair = new ToggleSwitch { IsOn = false, IsEnabled = false, OnContent = null, OffContent = null };
 
         var body = new StackPanel { Spacing = 14 };
         body.Children.Add(Row(
-            "Lancer au démarrage de Windows",
+            "Lancer à l’ouverture de session",
             autostart,
-            "Enregistre une entrée de démarrage utilisateur (HKCU\\…\\Run) ; réversible. Ne touche pas au pilote ni au format audio."));
+            "Démarre dans la zone de notification, surveille la carte et réapplique le profil après une reconnexion. Windows charge le DSP avec les flux audio."));
+        body.Children.Add(startupStatus);
         body.Children.Add(Divider());
         body.Children.Add(Row(
             "Rétablir le format 6 canaux si Windows le change",

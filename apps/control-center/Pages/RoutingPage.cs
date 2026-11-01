@@ -60,12 +60,15 @@ public sealed class RoutingPage : Microsoft.UI.Xaml.Controls.UserControl
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         SyncFromDraft();
+        _shell.CapabilitiesChanged -= OnEditorChanged;
+        _shell.CapabilitiesChanged += OnEditorChanged;
         _shell.Editor.Changed -= OnEditorChanged; // idempotent si Loaded est rejoué
         _shell.Editor.Changed += OnEditorChanged;
     }
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        _shell.CapabilitiesChanged -= OnEditorChanged;
         _shell.Editor.Changed -= OnEditorChanged;
     }
 
@@ -96,6 +99,7 @@ public sealed class RoutingPage : Microsoft.UI.Xaml.Controls.UserControl
             var policy = _shell.Editor.Draft.SourcePolicy;
             foreach (var row in _policyRows)
             {
+                row.Radio.IsEnabled = _shell.CanSelectSourcePolicy(row.Policy);
                 row.Radio.IsChecked = row.Policy == policy;
             }
             ShowActiveBadge(policy);
@@ -263,8 +267,7 @@ public sealed class RoutingPage : Microsoft.UI.Xaml.Controls.UserControl
         // SyncFromDraft, d'après le brouillon partagé.
         var radio = new RadioButton
         {
-            IsEnabled = _shell.Client is not Xonar.ControlCenter.Services.LiveApoBroker ||
-                (policy != SourcePolicy.ForceStereoFrontPair && _shell.Capabilities?.Features.AutoDeclaredLayout == true),
+            IsEnabled = _shell.CanSelectSourcePolicy(policy),
             GroupName = "SourcePolicy",
             Content = content,
             VerticalContentAlignment = VerticalAlignment.Top,
@@ -272,7 +275,10 @@ public sealed class RoutingPage : Microsoft.UI.Xaml.Controls.UserControl
             Margin = new Thickness(0, 2, 0, 2),
             Padding = new Thickness(8, 6, 8, 6),
         };
-        radio.Checked += (_, _) => OnPolicyChecked(policy);
+        // Checked peut être différé par WinUI après SyncFromDraft. Seul un clic
+        // utilisateur doit modifier le profil, jamais la synchronisation visuelle.
+        radio.Click += (_, _) => { if(radio.IsChecked == true) OnPolicyChecked(policy); };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(radio, title);
 
         _policyRows.Add((radio, policy, badge));
         return radio;

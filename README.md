@@ -13,6 +13,12 @@ Première version publique **0.5.0-preview.1**. Elle a été validée sur la Xon
 développeur, sous Windows 11 build 26200. Les autres configurations restent à valider.
 Consulter les [instructions d’installation et de retour arrière](docs/INSTALLATION.fr.md).
 
+Le correctif **0.5.0-preview.2 est en préparation** : il protège les associations
+APO contre leur modification par les services Windows, provisionne les effets
+depuis l’INF et corrige la récupération de la page de routage. La préversion
+téléchargeable ci-dessus ne contient pas encore cette protection. Voir les
+[détails et commandes de protection](docs/APO-PROTECTION.fr.md).
+
 **Le pilote est signé avec un certificat de test ; il n’est pas certifié Microsoft
 WHQL. Le mode test de Windows doit être activé avant l’installation.** L’assistant
 vérifie ce prérequis et demande l’accord pour installer le certificat public du

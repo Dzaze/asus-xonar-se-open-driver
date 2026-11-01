@@ -20,6 +20,34 @@ public static class LiveRuntimeTests
         Test.Run("Export réel : formats et marge sans identité de périphérique", Export);
         Test.Run("Format incompatible : commandes DSP désactivées", IncompatibleFormat);
         Test.Run("Contrôle local : version et endpoint inconnus refusés", UnknownRequests);
+        Test.Run("Routage : commandes actualisées après perte et réparation des effets", RoutingCapabilitiesRecovery);
+    }
+
+    private static void RoutingCapabilitiesRecovery()
+    {
+        LiveAudioDevice? device = Device() with { StreamEffects = false, OutputEffects = false };
+        var broker = new LiveApoBroker(Path.Combine(Path.GetTempPath(), Guid.NewGuid()+".cfg"), () => device, () => null);
+        var shell = new Xonar.ControlCenter.Shell.AppShellViewModel(broker);
+        int changes = 0;
+        shell.CapabilitiesChanged += () => ++changes;
+        shell.InitializeAsync().GetAwaiter().GetResult();
+        Test.Assert(!shell.CanSelectSourcePolicy(SourcePolicy.Preserve));
+        Test.Assert(!shell.CanSelectSourcePolicy(SourcePolicy.AutoDeclaredLayout));
+        device = Device() with { StreamEffects = false };
+        Test.Assert(broker.RefreshHardware());
+        shell.InitializeAsync().GetAwaiter().GetResult();
+        Test.Assert(shell.CanSelectSourcePolicy(SourcePolicy.Preserve), "Préserver reste disponible avec le seul GFX.");
+        Test.Assert(!shell.CanSelectSourcePolicy(SourcePolicy.AutoDeclaredLayout));
+        device = Device();
+        Test.Assert(broker.RefreshHardware());
+        shell.InitializeAsync().GetAwaiter().GetResult();
+        Test.Assert(shell.CanSelectSourcePolicy(SourcePolicy.AutoDeclaredLayout));
+        Test.Assert(!shell.CanSelectSourcePolicy(SourcePolicy.ForceStereoFrontPair));
+        device = null;
+        broker.RefreshHardware();
+        shell.InitializeAsync().GetAwaiter().GetResult();
+        Test.Assert(!shell.CanSelectSourcePolicy(SourcePolicy.Preserve));
+        Test.Equal(4, changes, "La page doit être avertie même sans changement de profil.");
     }
 
     private static void NoInventedState()

@@ -61,6 +61,11 @@ cette préversion a été validé en mode partagé, pas en exclusif ou ASIO.
 
 ## Récupération
 
+À partir du correctif 0.5.0-preview.2, l’installation protège les clés d’effets
+Xonar contre les écritures et suppressions ordinaires des comptes système.
+Notre installateur et la désinstallation gèrent le déverrouillage nécessaire.
+Voir [la protection des associations DSP](APO-PROTECTION.fr.md).
+
 **Diagnostic → Retrouver la carte et réappliquer** relit le matériel et le profil.
 Si une réinstallation du pilote a supprimé les associations d’effets, utiliser
 **Réparer l’installation (administrateur)** ou relancer le Setup.

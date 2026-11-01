@@ -49,7 +49,7 @@ public static class StartupManager
                 {
                     return false;
                 }
-                key.SetValue(ValueName, $"\"{exe}\"");
+                key.SetValue(ValueName, $"\"{exe}\" --background");
             }
             else
             {
